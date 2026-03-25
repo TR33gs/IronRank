@@ -115,18 +115,29 @@ header{padding:30px 0 24px;display:flex;align-items:center;justify-content:space
 .orm-preview{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;letter-spacing:1px;color:var(--accent2);height:16px;margin-bottom:4px}
 
 /* ── BODY MAP ── */
-.bmap-wrap{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
-.bsvg-wrap{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.bmap-wrap{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start}
+.bsvg-wrap{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:8px}
 .bview-toggle{display:flex;gap:3px}
-.bview-btn{padding:5px 13px;font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--muted);cursor:pointer;transition:all .2s}
+.bview-btn{padding:6px 16px;font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--muted);cursor:pointer;transition:all .2s}
 .bview-btn.active{border-color:var(--accent);color:var(--text)}
-.blegend{display:flex;flex-direction:column;gap:7px}
-.bleg-item{display:flex;align-items:center;gap:11px;padding:9px 13px;background:var(--surface);border:1px solid var(--border);border-radius:2px}
+.blegend{display:flex;flex-direction:column;gap:6px}
+.bleg-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:border-color .2s}
+.bleg-item:hover{border-color:var(--muted)}
 .bleg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.bleg-name{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;flex:1}
-.bleg-rank{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:1px;text-transform:uppercase}
-.bleg-score{font-family:'Black Han Sans',sans-serif;font-size:.82rem;color:var(--muted);margin-left:7px}
-.bnote{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:1px;color:var(--muted);text-align:center}
+.bleg-name{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;flex:1}
+.bleg-rank{font-family:'Barlow Condensed',sans-serif;font-size:.63rem;letter-spacing:1px;text-transform:uppercase}
+.bleg-score{font-family:'Black Han Sans',sans-serif;font-size:.8rem;color:var(--muted);margin-left:6px}
+.bnote{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:1px;color:var(--muted);text-align:center}
+@media(max-width:700px){
+  .bmap-wrap{grid-template-columns:1fr;gap:12px}
+  .bsvg-wrap{flex-direction:row;align-items:flex-start;gap:12px;padding:12px}
+  .bsvg-inner{flex-shrink:0;width:140px}
+  .bleg-side{flex:1}
+  .blegend{gap:4px}
+  .bleg-item{padding:6px 8px;gap:7px}
+  .bleg-name{font-size:.62rem}
+  .bleg-score{display:none}
+}
 
 /* ── LEADERBOARD ── */
 .lb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -182,8 +193,80 @@ header{padding:30px 0 24px;display:flex;align-items:center;justify-content:space
 .precision-note{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:2px;padding:10px 14px;margin-bottom:16px;font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:1px;color:var(--muted);line-height:1.6}
 .precision-note strong{color:var(--accent2)}
 
-@media(max-width:700px){.g4{grid-template-columns:1fr 1fr}.log-wrap{grid-template-columns:1fr}.bmap-wrap{grid-template-columns:1fr}.ex-list{max-height:200px}}
-@media(max-width:480px){.g2,.g3{grid-template-columns:1fr}}
+/* ── MOBILE OPTIMIZATION ── */
+@media(max-width:700px){
+  .app{padding:0 12px 100px}
+  header{padding:16px 0 14px;margin-bottom:18px}
+  .logo{font-size:1.4rem;letter-spacing:3px}
+  .user-pill{display:none}
+  .btn-logout{padding:5px 10px;font-size:.6rem}
+  .rank-card{padding:18px 16px;margin-bottom:14px}
+  .rank-badge{width:58px;height:58px}
+  .rank-icon{font-size:1.3rem}
+  .rank-info h2{font-size:1.5rem}
+  .score-num{font-size:2.2rem}
+  .tabs{gap:1px;padding:2px;margin-bottom:14px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .tab{min-width:0;flex:none;padding:9px 10px;font-size:.65rem;letter-spacing:1px;white-space:nowrap}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3,.g4{grid-template-columns:1fr 1fr}
+  .log-wrap{grid-template-columns:1fr;gap:10px}
+  .ex-list{max-height:220px}
+  /* Body map stacks vertically on mobile */
+  .bmap-wrap{grid-template-columns:1fr;gap:14px}
+  .bsvg-wrap{padding:12px 8px}
+  /* Lift cards smaller */
+  .lifts-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px}
+  .lc{padding:10px}
+  .lc-val{font-size:1.2rem}
+  /* Leaderboard compact */
+  .lb-row{gap:8px;padding:10px 10px}
+  .lb-pos{width:26px;font-size:1rem}
+  .lb-avatar{width:28px;height:28px;font-size:.85rem}
+  .lb-score{font-size:1rem}
+  .lb-rank-badge{display:none}
+  .lb-stats{display:none}
+  /* History compact */
+  .hist-item{padding:10px 12px}
+  /* Rank ladder */
+  .rung{padding:8px 10px;gap:8px}
+  /* Auth */
+  .auth-box{padding:12px}
+  .auth-logo{font-size:2.2rem}
+  .auth-tag{margin-bottom:20px}
+  .auth-card{padding:20px 16px}
+  /* Precision note shorter */
+  .precision-note{font-size:.68rem;padding:8px 10px}
+  /* Toast bottom center on mobile */
+  .toast{left:12px;right:12px;bottom:74px;max-width:none;text-align:center}
+  /* Profile lift inputs */
+  .sec{margin:14px 0 7px;font-size:.6rem}
+}
+@media(max-width:400px){
+  .g2,.g3,.g4{grid-template-columns:1fr 1fr}
+  .tab{padding:8px 8px;font-size:.6rem}
+}
+
+/* Bottom nav on mobile */
+.bottom-nav{display:none}
+@media(max-width:700px){
+  .tabs{display:none}
+  .bottom-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;
+    background:var(--surface);border-top:1px solid var(--border);
+    z-index:50;padding:0;padding-bottom:env(safe-area-inset-bottom)
+  }
+  .bnav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;padding:8px 2px 6px;gap:3px;
+    font-family:'Barlow Condensed',sans-serif;font-size:.52rem;
+    letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+    cursor:pointer;border:none;background:transparent;transition:color .2s;
+    -webkit-tap-highlight-color:transparent
+  }
+  .bnav-item.active{color:var(--accent)}
+  .bnav-item svg{width:20px;height:20px;stroke-width:1.8}
+  .bnav-item.active svg{stroke:var(--accent)}
+}
 </style>
 </head>
 <body>
@@ -252,12 +335,12 @@ header{padding:30px 0 24px;display:flex;align-items:center;justify-content:space
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab active" onclick="ST('profile',this)">Profile</button>
-    <button class="tab" onclick="ST('body',this)">Body Map</button>
-    <button class="tab" onclick="ST('log',this)">Log Workout</button>
-    <button class="tab" onclick="ST('history',this)">History</button>
-    <button class="tab" onclick="ST('leaderboard',this)">Leaderboard</button>
-    <button class="tab" onclick="ST('ranks',this)">Ranks</button>
+    <button class="tab active" onclick="ST('profile',this)" data-tab="profile">Profile</button>
+    <button class="tab" onclick="ST('body',this)" data-tab="body">Body Map</button>
+    <button class="tab" onclick="ST('log',this)" data-tab="log">Log Workout</button>
+    <button class="tab" onclick="ST('history',this)" data-tab="history">History</button>
+    <button class="tab" onclick="ST('leaderboard',this)" data-tab="leaderboard">Leaderboard</button>
+    <button class="tab" onclick="ST('ranks',this)" data-tab="ranks">Ranks</button>
   </div>
 
   <!-- PROFILE -->
@@ -282,15 +365,17 @@ header{padding:30px 0 24px;display:flex;align-items:center;justify-content:space
   <!-- BODY MAP -->
   <div class="panel" id="panel-body">
     <div class="bmap-wrap">
-      <div>
-        <div class="bsvg-wrap">
-          <div class="bview-toggle">
-            <button class="bview-btn active" onclick="setBV('front',this)">Front</button>
-            <button class="bview-btn" onclick="setBV('back',this)">Back</button>
-          </div>
-          <div id="bsvg"></div>
-          <div class="bnote">Click a muscle to see rank</div>
+      <div class="bsvg-wrap">
+        <div class="bview-toggle">
+          <button class="bview-btn active" onclick="setBV('front',this)">Front</button>
+          <button class="bview-btn" onclick="setBV('back',this)">Back</button>
         </div>
+        <div class="bsvg-inner">
+          <div id="bsvg"></div>
+          <div class="bnote" style="margin-top:6px">Tap a muscle</div>
+        </div>
+        <!-- legend appears beside SVG on mobile -->
+        <div class="bleg-side" id="blegSide" style="display:none"></div>
       </div>
       <div>
         <div class="sec" style="margin-top:0">Muscle Rankings</div>
@@ -362,6 +447,29 @@ header{padding:30px 0 24px;display:flex;align-items:center;justify-content:space
   </div>
 </div>
 
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bnav-item active" onclick="ST('profile',this)" data-tab="profile">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    Profile
+  </button>
+  <button class="bnav-item" onclick="ST('body',this)" data-tab="body">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-1 5h2l1 4h3l-1 1.5-1-.5.5 6h-1l-.5-3.5-.5 3.5h-1l.5-6-1 .5L11 11h3l1-4z"/></svg>
+    Body
+  </button>
+  <button class="bnav-item" onclick="ST('log',this)" data-tab="log">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    Log
+  </button>
+  <button class="bnav-item" onclick="ST('leaderboard',this)" data-tab="leaderboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 17H4a1 1 0 01-1-1v-4a1 1 0 011-1h4m8 6h4a1 1 0 001-1V7a1 1 0 00-1-1h-4m-8 11V9m8 8V5M8 9h8"/></svg>
+    Board
+  </button>
+  <button class="bnav-item" onclick="ST('ranks',this)" data-tab="ranks">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    Ranks
+  </button>
+</nav>
 <script>
 // ══════════════════════════════════════════════════════════════════════
 //  DATA
@@ -932,88 +1040,297 @@ function togSec(id){
 let bview='front';
 function setBV(v,btn){bview=v;document.querySelectorAll('.bview-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderBody()}
 function gcol(gid){const s=gScore(gid);return s>0?getRank(s).c:'#252530'}
+function gdim(gid){const s=gScore(gid);return s>0?getRank(s):{c:'#252530',n:'Unranked',i:''}}
 
 function renderBody(){
   const c={};MG.forEach(g=>c[g.id]=gcol(g.id));
-  const F=`<svg viewBox="0 0 200 410" width="168" height="320" xmlns="http://www.w3.org/2000/svg">
-  <defs><filter id="gf"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-  <ellipse cx="100" cy="25" rx="19" ry="23" fill="#1c1c28" stroke="#333348" stroke-width="1.5"/>
-  <rect x="92" y="46" width="16" height="12" rx="3" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="63" cy="72" rx="18" ry="13" fill="${c.shoulders}" opacity=".9" filter="url(#gf)" class="br" data-g="shoulders"/>
-  <ellipse cx="137" cy="72" rx="18" ry="13" fill="${c.shoulders}" opacity=".9" filter="url(#gf)" class="br" data-g="shoulders"/>
-  <path d="M79 59 Q100 53 121 59 L124 94 Q100 102 76 94 Z" fill="${c.chest}" opacity=".9" filter="url(#gf)" class="br" data-g="chest"/>
-  <path d="M80 94 Q100 102 120 94 L118 148 Q100 154 82 148 Z" fill="${c.core}" opacity=".9" filter="url(#gf)" class="br" data-g="core"/>
-  <path d="M76 94 L63 89 L59 150 L80 150 Z" fill="${c.back}" opacity=".55" filter="url(#gf)" class="br" data-g="back"/>
-  <path d="M124 94 L137 89 L141 150 L120 150 Z" fill="${c.back}" opacity=".55" filter="url(#gf)" class="br" data-g="back"/>
-  <path d="M59 86 L45 88 L37 148 L52 150 L60 116 Z" fill="${c.arms}" opacity=".9" filter="url(#gf)" class="br" data-g="arms"/>
-  <path d="M141 86 L155 88 L163 148 L148 150 L140 116 Z" fill="${c.arms}" opacity=".9" filter="url(#gf)" class="br" data-g="arms"/>
-  <path d="M37 148 L33 195 L49 197 L52 150 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <path d="M163 148 L167 195 L151 197 L148 150 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="41" cy="201" rx="9" ry="7" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="159" cy="201" rx="9" ry="7" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <path d="M80 148 Q100 156 120 148 L122 190 Q100 200 78 190 Z" fill="${c.legs}" opacity=".85" filter="url(#gf)" class="br" data-g="legs"/>
-  <path d="M80 188 L77 192 L73 268 L92 270 L94 190 Z" fill="${c.legs}" opacity=".9" filter="url(#gf)" class="br" data-g="legs"/>
-  <path d="M120 188 L123 192 L127 268 L108 270 L106 190 Z" fill="${c.legs}" opacity=".9" filter="url(#gf)" class="br" data-g="legs"/>
-  <ellipse cx="83" cy="274" rx="11" ry="8" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="117" cy="274" rx="11" ry="8" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <path d="M72 281 L75 348 L91 348 L92 281 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <path d="M128 281 L125 348 L109 348 L108 281 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="83" cy="322" rx="9" ry="20" fill="${c.calves}" opacity=".85" filter="url(#gf)" class="br" data-g="calves"/>
-  <ellipse cx="117" cy="322" rx="9" ry="20" fill="${c.calves}" opacity=".85" filter="url(#gf)" class="br" data-g="calves"/>
-  <ellipse cx="83" cy="352" rx="11" ry="5" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="117" cy="352" rx="11" ry="5" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  // Tooltip popup
+  const tip=`<g id="btt" style="display:none;pointer-events:none">
+    <rect id="btr" x="0" y="0" width="90" height="28" rx="4" fill="#111116" stroke="#2a2a38" stroke-width="1"/>
+    <text id="btx" x="45" y="18" text-anchor="middle" fill="#e8e8f0" font-family="Barlow Condensed,sans-serif" font-size="10" letter-spacing="1">—</text>
+  </g>`;
+
+  const FRONT = `<svg viewBox="0 0 220 500" xmlns="http://www.w3.org/2000/svg" id="bodySvgEl" style="width:100%;max-width:200px;height:auto">
+  <defs>
+    <filter id="gf" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="gf2" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- BODY BASE OUTLINE (skin tone dark) -->
+  <!-- Head -->
+  <ellipse cx="110" cy="32" rx="24" ry="28" fill="#1a1a24" stroke="#2a2a38" stroke-width="1.5"/>
+  <!-- Ear details -->
+  <ellipse cx="86" cy="34" rx="4" ry="6" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <ellipse cx="134" cy="34" rx="4" ry="6" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <!-- Neck -->
+  <path d="M100 56 Q110 60 120 56 L121 72 Q110 76 99 72 Z" fill="#1a1a24" stroke="#2a2a38" stroke-width="1"/>
+
+  <!-- TRAPEZIUS / UPPER BACK VISIBLE FROM FRONT -->
+  <path d="M99 66 Q110 70 121 66 L130 78 Q110 82 90 78 Z" fill="${c.back}" opacity=".5" filter="url(#gf2)" class="br" data-g="back"/>
+
+  <!-- SHOULDERS (deltoids) — large rounded blobs -->
+  <ellipse cx="74" cy="90" rx="22" ry="17" fill="${c.shoulders}" opacity=".92" filter="url(#gf)" class="br" data-g="shoulders"/>
+  <ellipse cx="146" cy="90" rx="22" ry="17" fill="${c.shoulders}" opacity=".92" filter="url(#gf)" class="br" data-g="shoulders"/>
+  <!-- Shoulder highlight -->
+  <ellipse cx="74" cy="85" rx="10" ry="7" fill="${c.shoulders}" opacity=".3"/>
+  <ellipse cx="146" cy="85" rx="10" ry="7" fill="${c.shoulders}" opacity=".3"/>
+
+  <!-- CHEST (pectorals) — two distinct lobes -->
+  <path d="M91 76 Q110 70 129 76 L132 108 Q121 116 110 118 Q99 116 88 108 Z" fill="${c.chest}" opacity=".95" filter="url(#gf)" class="br" data-g="chest"/>
+  <!-- Pec split line -->
+  <line x1="110" y1="76" x2="110" y2="116" stroke="#0a0a0c" stroke-width="1" opacity=".4"/>
+  <!-- Lower pec definition -->
+  <path d="M88 108 Q99 118 110 118 Q121 118 132 108" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".3"/>
+
+  <!-- SERRATUS (sides of chest) -->
+  <path d="M88 96 L76 100 L78 116 L90 112 Z" fill="${c.chest}" opacity=".4" class="br" data-g="chest"/>
+  <path d="M132 96 L144 100 L142 116 L130 112 Z" fill="${c.chest}" opacity=".4" class="br" data-g="chest"/>
+
+  <!-- ABS (rectus abdominis) — 6 blocks -->
+  <path d="M90 118 Q110 124 130 118 L128 180 Q110 186 92 180 Z" fill="${c.core}" opacity=".92" filter="url(#gf)" class="br" data-g="core"/>
+  <!-- Linea alba (center line) -->
+  <line x1="110" y1="118" x2="110" y2="180" stroke="#0a0a0c" stroke-width="1.5" opacity=".5"/>
+  <!-- Horizontal tendon lines -->
+  <path d="M93 136 Q110 140 127 136" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".4"/>
+  <path d="M93 153 Q110 157 127 153" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".4"/>
+  <path d="M93 168 Q110 172 127 168" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".4"/>
+
+  <!-- OBLIQUES -->
+  <path d="M90 124 L78 130 L76 170 L92 164 Z" fill="${c.core}" opacity=".55" class="br" data-g="core"/>
+  <path d="M130 124 L142 130 L144 170 L128 164 Z" fill="${c.core}" opacity=".55" class="br" data-g="core"/>
+
+  <!-- LATS (visible from front, sides) -->
+  <path d="M88 96 L72 108 L70 162 L91 158 Z" fill="${c.back}" opacity=".65" filter="url(#gf2)" class="br" data-g="back"/>
+  <path d="M132 96 L148 108 L150 162 L129 158 Z" fill="${c.back}" opacity=".65" filter="url(#gf2)" class="br" data-g="back"/>
+
+  <!-- UPPER ARMS (biceps) -->
+  <path d="M68 100 L52 104 L46 158 L63 162 L72 128 Z" fill="${c.arms}" opacity=".92" filter="url(#gf)" class="br" data-g="arms"/>
+  <path d="M152 100 L168 104 L174 158 L157 162 L148 128 Z" fill="${c.arms}" opacity=".92" filter="url(#gf)" class="br" data-g="arms"/>
+  <!-- Bicep peak definition -->
+  <path d="M57 120 Q54 130 53 140" fill="none" stroke="${c.arms}" stroke-width="2" opacity=".5"/>
+  <path d="M163 120 Q166 130 167 140" fill="none" stroke="${c.arms}" stroke-width="2" opacity=".5"/>
+
+  <!-- FOREARMS -->
+  <path d="M46 158 L38 214 L56 218 L63 162 Z" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <path d="M174 158 L182 214 L164 218 L157 162 Z" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <!-- Forearm veins/lines -->
+  <path d="M50 170 L44 200" fill="none" stroke="#2a2a38" stroke-width="1" opacity=".6"/>
+  <path d="M170 170 L176 200" fill="none" stroke="#2a2a38" stroke-width="1" opacity=".6"/>
+
+  <!-- HANDS -->
+  <ellipse cx="47" cy="222" rx="10" ry="9" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <ellipse cx="173" cy="222" rx="10" ry="9" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+
+  <!-- HIP / PELVIS -->
+  <path d="M92 180 Q110 188 128 180 L132 214 Q110 224 88 214 Z" fill="#1a1a24" stroke="#2a2a38" stroke-width="1" opacity=".8"/>
+
+  <!-- GLUTES visible from front (hip flexors area) -->
+  <path d="M88 186 L76 196 L78 222 L92 218 Z" fill="${c.legs}" opacity=".4" class="br" data-g="legs"/>
+  <path d="M132 186 L144 196 L142 222 L128 218 Z" fill="${c.legs}" opacity=".4" class="br" data-g="legs"/>
+
+  <!-- QUADS (vastus medialis, lateralis, rectus) — detailed shape -->
+  <!-- Left quad -->
+  <path d="M89 214 L76 220 L70 318 L92 322 L96 218 Z" fill="${c.legs}" opacity=".95" filter="url(#gf)" class="br" data-g="legs"/>
+  <!-- Left quad highlight (vastus medialis teardrop) -->
+  <ellipse cx="88" cy="306" rx="9" ry="12" fill="${c.legs}" opacity=".5" filter="url(#gf2)" class="br" data-g="legs"/>
+  <!-- Right quad -->
+  <path d="M131 214 L144 220 L150 318 L128 322 L124 218 Z" fill="${c.legs}" opacity=".95" filter="url(#gf)" class="br" data-g="legs"/>
+  <!-- Right quad highlight -->
+  <ellipse cx="132" cy="306" rx="9" ry="12" fill="${c.legs}" opacity=".5" filter="url(#gf2)" class="br" data-g="legs"/>
+  <!-- Quad separation line -->
+  <path d="M88 230 Q87 270 88 306" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".3"/>
+  <path d="M132 230 Q133 270 132 306" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".3"/>
+
+  <!-- KNEES -->
+  <ellipse cx="89" cy="326" rx="14" ry="10" fill="#161620" stroke="#2a2a38" stroke-width="1.5"/>
+  <ellipse cx="131" cy="326" rx="14" ry="10" fill="#161620" stroke="#2a2a38" stroke-width="1.5"/>
+  <!-- Kneecap -->
+  <ellipse cx="89" cy="325" rx="8" ry="7" fill="#1a1a24" stroke="#2a2a38" stroke-width="1"/>
+  <ellipse cx="131" cy="325" rx="8" ry="7" fill="#1a1a24" stroke="#2a2a38" stroke-width="1"/>
+
+  <!-- SHINS (tibia) -->
+  <path d="M76 334 L78 416 L100 416 L102 334 Z" fill="#1a1a24" stroke="#2a2a38" stroke-width="1"/>
+  <path d="M144 334 L142 416 L120 416 L118 334 Z" fill="#1a1a24" stroke="#2a2a38" stroke-width="1"/>
+
+  <!-- CALVES (gastrocnemius) -->
+  <ellipse cx="89" cy="372" rx="13" ry="30" fill="${c.calves}" opacity=".9" filter="url(#gf)" class="br" data-g="calves"/>
+  <ellipse cx="131" cy="372" rx="13" ry="30" fill="${c.calves}" opacity=".9" filter="url(#gf)" class="br" data-g="calves"/>
+  <!-- Calf split -->
+  <path d="M89 348 Q88 370 89 396" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".3"/>
+  <path d="M131 348 Q132 370 131 396" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".3"/>
+
+  <!-- FEET -->
+  <path d="M78 414 L68 424 L102 428 L102 414 Z" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <path d="M142 414 L152 424 L118 428 L118 414 Z" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+
+  ${tip}
   </svg>`;
 
-  const B=`<svg viewBox="0 0 200 410" width="168" height="320" xmlns="http://www.w3.org/2000/svg">
-  <defs><filter id="gb"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-  <ellipse cx="100" cy="25" rx="19" ry="23" fill="#1c1c28" stroke="#333348" stroke-width="1.5"/>
-  <rect x="92" y="46" width="16" height="12" rx="3" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="63" cy="72" rx="18" ry="13" fill="${c.shoulders}" opacity=".9" filter="url(#gb)" class="br" data-g="shoulders"/>
-  <ellipse cx="137" cy="72" rx="18" ry="13" fill="${c.shoulders}" opacity=".9" filter="url(#gb)" class="br" data-g="shoulders"/>
-  <path d="M79 59 Q100 53 121 59 L124 94 Q100 98 76 94 Z" fill="${c.back}" opacity=".9" filter="url(#gb)" class="br" data-g="back"/>
-  <path d="M76 94 L63 89 L59 150 L80 150 Z" fill="${c.back}" opacity=".9" filter="url(#gb)" class="br" data-g="back"/>
-  <path d="M124 94 L137 89 L141 150 L120 150 Z" fill="${c.back}" opacity=".9" filter="url(#gb)" class="br" data-g="back"/>
-  <path d="M80 94 Q100 100 120 94 L118 150 Q100 154 82 150 Z" fill="${c.back}" opacity=".82" filter="url(#gb)" class="br" data-g="back"/>
-  <path d="M59 86 L45 88 L37 148 L52 150 L60 116 Z" fill="${c.arms}" opacity=".9" filter="url(#gb)" class="br" data-g="arms"/>
-  <path d="M141 86 L155 88 L163 148 L148 150 L140 116 Z" fill="${c.arms}" opacity=".9" filter="url(#gb)" class="br" data-g="arms"/>
-  <path d="M37 148 L33 195 L49 197 L52 150 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <path d="M163 148 L167 195 L151 197 L148 150 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="41" cy="201" rx="9" ry="7" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="159" cy="201" rx="9" ry="7" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <path d="M80 148 Q100 156 120 148 L123 192 Q100 202 77 192 Z" fill="${c.legs}" opacity=".9" filter="url(#gb)" class="br" data-g="legs"/>
-  <path d="M80 190 L77 194 L73 270 L92 272 L94 192 Z" fill="${c.legs}" opacity=".9" filter="url(#gb)" class="br" data-g="legs"/>
-  <path d="M120 190 L123 194 L127 270 L108 272 L106 192 Z" fill="${c.legs}" opacity=".9" filter="url(#gb)" class="br" data-g="legs"/>
-  <ellipse cx="83" cy="276" rx="11" ry="8" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="117" cy="276" rx="11" ry="8" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <path d="M72 283 L75 350 L91 350 L92 283 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <path d="M128 283 L125 350 L109 350 L108 283 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="83" cy="323" rx="9" ry="21" fill="${c.calves}" opacity=".9" filter="url(#gb)" class="br" data-g="calves"/>
-  <ellipse cx="117" cy="323" rx="9" ry="21" fill="${c.calves}" opacity=".9" filter="url(#gb)" class="br" data-g="calves"/>
-  <ellipse cx="83" cy="354" rx="11" ry="5" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
-  <ellipse cx="117" cy="354" rx="11" ry="5" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  const BACK = `<svg viewBox="0 0 220 500" xmlns="http://www.w3.org/2000/svg" id="bodySvgEl" style="width:100%;max-width:200px;height:auto">
+  <defs>
+    <filter id="gb" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="gb2" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Head back -->
+  <ellipse cx="110" cy="32" rx="24" ry="28" fill="#1a1a24" stroke="#2a2a38" stroke-width="1.5"/>
+  <ellipse cx="86" cy="34" rx="4" ry="6" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <ellipse cx="134" cy="34" rx="4" ry="6" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <!-- Neck back -->
+  <path d="M100 56 Q110 58 120 56 L121 72 Q110 74 99 72 Z" fill="#1a1a24" stroke="#2a2a38" stroke-width="1"/>
+
+  <!-- TRAPEZIUS — large diamond shape upper back -->
+  <path d="M99 60 Q110 56 121 60 L136 82 Q110 92 84 82 Z" fill="${c.back}" opacity=".95" filter="url(#gb)" class="br" data-g="back"/>
+  <!-- Trap split -->
+  <line x1="110" y1="60" x2="110" y2="90" stroke="#0a0a0c" stroke-width="1" opacity=".4"/>
+
+  <!-- REAR DELTOIDS -->
+  <ellipse cx="74" cy="90" rx="22" ry="17" fill="${c.shoulders}" opacity=".92" filter="url(#gb)" class="br" data-g="shoulders"/>
+  <ellipse cx="146" cy="90" rx="22" ry="17" fill="${c.shoulders}" opacity=".92" filter="url(#gb)" class="br" data-g="shoulders"/>
+
+  <!-- RHOMBOIDS / MID BACK -->
+  <path d="M88 90 L132 90 L130 130 Q110 136 90 130 Z" fill="${c.back}" opacity=".88" filter="url(#gb)" class="br" data-g="back"/>
+  <!-- Spine detail -->
+  <line x1="110" y1="88" x2="110" y2="180" stroke="#0a0a0c" stroke-width="2" opacity=".5"/>
+  <!-- Back muscle striations -->
+  <path d="M93 100 Q110 104 127 100" fill="none" stroke="#0a0a0c" stroke-width=".8" opacity=".3"/>
+  <path d="M92 114 Q110 118 128 114" fill="none" stroke="#0a0a0c" stroke-width=".8" opacity=".3"/>
+
+  <!-- LATS (latissimus dorsi) — large wing shapes -->
+  <path d="M88 88 L68 104 L66 168 L92 172 L90 128 Z" fill="${c.back}" opacity=".95" filter="url(#gb)" class="br" data-g="back"/>
+  <path d="M132 88 L152 104 L154 168 L128 172 L130 128 Z" fill="${c.back}" opacity=".95" filter="url(#gb)" class="br" data-g="back"/>
+  <!-- Lat definition line -->
+  <path d="M88 100 Q80 130 68 158" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".3"/>
+  <path d="M132 100 Q140 130 152 158" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".3"/>
+
+  <!-- LOWER BACK (erector spinae) -->
+  <path d="M92 128 Q110 136 128 128 L126 178 Q110 184 94 178 Z" fill="${c.back}" opacity=".82" filter="url(#gb2)" class="br" data-g="back"/>
+  <!-- Erector columns -->
+  <path d="M102 132 L101 176" fill="none" stroke="#0a0a0c" stroke-width="1.5" opacity=".35"/>
+  <path d="M118 132 L119 176" fill="none" stroke="#0a0a0c" stroke-width="1.5" opacity=".35"/>
+
+  <!-- TRICEPS (back of arms) -->
+  <path d="M68 100 L52 104 L46 158 L63 162 L72 128 Z" fill="${c.arms}" opacity=".92" filter="url(#gb)" class="br" data-g="arms"/>
+  <path d="M152 100 L168 104 L174 158 L157 162 L148 128 Z" fill="${c.arms}" opacity=".92" filter="url(#gb)" class="br" data-g="arms"/>
+  <!-- Tricep horseshoe -->
+  <path d="M60 130 Q53 145 57 158" fill="none" stroke="${c.arms}" stroke-width="2" opacity=".4"/>
+  <path d="M160 130 Q167 145 163 158" fill="none" stroke="${c.arms}" stroke-width="2" opacity=".4"/>
+
+  <!-- FOREARMS -->
+  <path d="M46 158 L38 214 L56 218 L63 162 Z" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <path d="M174 158 L182 214 L164 218 L157 162 Z" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <ellipse cx="47" cy="222" rx="10" ry="9" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <ellipse cx="173" cy="222" rx="10" ry="9" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+
+  <!-- GLUTES — rounded shapes -->
+  <path d="M88 178 L74 188 L76 230 L96 234 L100 188 Z" fill="${c.legs}" opacity=".95" filter="url(#gb)" class="br" data-g="legs"/>
+  <path d="M132 178 L146 188 L144 230 L124 234 L120 188 Z" fill="${c.legs}" opacity=".95" filter="url(#gb)" class="br" data-g="legs"/>
+  <!-- Glute definition -->
+  <path d="M110 184 L110 232" fill="none" stroke="#0a0a0c" stroke-width="2" opacity=".5"/>
+  <!-- Glute fold -->
+  <path d="M78 228 Q110 238 142 228" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".4"/>
+
+  <!-- HAMSTRINGS -->
+  <path d="M90 232 L76 238 L74 322 L94 326 L96 236 Z" fill="${c.legs}" opacity=".88" filter="url(#gb)" class="br" data-g="legs"/>
+  <path d="M130 232 L144 238 L146 322 L126 326 L124 236 Z" fill="${c.legs}" opacity=".88" filter="url(#gb)" class="br" data-g="legs"/>
+  <!-- Hamstring biceps femoris line -->
+  <path d="M88 248 Q86 280 86 314" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".3"/>
+  <path d="M132 248 Q134 280 134 314" fill="none" stroke="#0a0a0c" stroke-width="1" opacity=".3"/>
+
+  <!-- KNEES back -->
+  <ellipse cx="89" cy="328" rx="14" ry="10" fill="#161620" stroke="#2a2a38" stroke-width="1.5"/>
+  <ellipse cx="131" cy="328" rx="14" ry="10" fill="#161620" stroke="#2a2a38" stroke-width="1.5"/>
+
+  <!-- CALVES back (large gastrocnemius) -->
+  <path d="M76 336 L78 418 L100 418 L102 336 Z" fill="#1a1a24" stroke="#2a2a38" stroke-width="1"/>
+  <path d="M144 336 L142 418 L120 418 L118 336 Z" fill="#1a1a24" stroke="#2a2a38" stroke-width="1"/>
+  <ellipse cx="89" cy="374" rx="14" ry="32" fill="${c.calves}" opacity=".95" filter="url(#gb)" class="br" data-g="calves"/>
+  <ellipse cx="131" cy="374" rx="14" ry="32" fill="${c.calves}" opacity=".95" filter="url(#gb)" class="br" data-g="calves"/>
+  <!-- Calf gastrocnemius split -->
+  <path d="M89 345 Q88 368 89 400" fill="none" stroke="#0a0a0c" stroke-width="1.5" opacity=".4"/>
+  <path d="M131 345 Q132 368 131 400" fill="none" stroke="#0a0a0c" stroke-width="1.5" opacity=".4"/>
+
+  <!-- FEET back -->
+  <path d="M78 416 L68 428 L102 430 L102 416 Z" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+  <path d="M142 416 L152 428 L118 430 L118 416 Z" fill="#161620" stroke="#2a2a38" stroke-width="1"/>
+
+  ${tip}
   </svg>`;
 
-  document.getElementById('bsvg').innerHTML=bview==='front'?F:B;
+  document.getElementById('bsvg').innerHTML = bview==='front' ? FRONT : BACK;
+
+  // Interactive hover + click
   document.querySelectorAll('.br').forEach(el=>{
-    el.style.cursor='pointer';el.style.transition='opacity .2s';
-    el.addEventListener('mouseenter',()=>el.style.opacity='1');
-    el.addEventListener('mouseleave',()=>{el.style.opacity=el.getAttribute('opacity')||'.9'});
-    el.addEventListener('click',()=>{
+    el.style.cursor='pointer';
+    el.style.transition='filter .2s, opacity .2s';
+    el.addEventListener('mouseenter',()=>{
+      el.style.filter='brightness(1.3)';
+    });
+    el.addEventListener('mouseleave',()=>{
+      el.style.filter='';
+    });
+    el.addEventListener('click',(e)=>{
       const g=MG.find(x=>x.id===el.dataset.g);
-      const s=gScore(g.id),r=getRank(s);
+      const s=gScore(g.id),r=gdim(g.id);
+      // Show SVG tooltip
+      const tt=document.getElementById('btt');
+      const tx=document.getElementById('btx');
+      const tr=document.getElementById('btr');
+      if(tt){
+        const svg=document.getElementById('bodySvgEl');
+        const svgRect=svg.getBoundingClientRect();
+        const elRect=el.getBoundingClientRect();
+        const cx=(elRect.left+elRect.right)/2-svgRect.left;
+        const cy=elRect.top-svgRect.top-32;
+        const vbW=220, vbH=500;
+        const scaleX=vbW/svgRect.width, scaleY=vbH/svgRect.height;
+        const vx=cx*scaleX, vy=cy*scaleY;
+        const label=s>0?`${r.i} ${r.n} · ${s}pts`:`${g.name}: No data`;
+        tx.textContent=label;
+        tr.setAttribute('x',Math.max(2,Math.min(vbW-92,vx-45)));
+        tr.setAttribute('y',Math.max(2,vy));
+        tx.setAttribute('x',Math.max(47,Math.min(vbW-47,vx)));
+        tx.setAttribute('y',Math.max(18,vy+16));
+        tt.style.display='';
+        setTimeout(()=>tt.style.display='none',2000);
+      }
       toast(`${g.name}: ${s>0?r.i+' '+r.n+' · '+s+' pts':'No data yet'}`);
     });
+    // Touch support
+    el.addEventListener('touchstart',(e)=>{e.preventDefault();el.dispatchEvent(new MouseEvent('click'))},{passive:false});
   });
 
-  document.getElementById('blegend').innerHTML=MG.map(g=>{
-    const s=gScore(g.id),r=getRank(s),col=s>0?r.c:'#2a2a38';
-    return`<div class="bleg-item">
+  const legendHTML = MG.map(g=>{
+    const s=gScore(g.id),r=gdim(g.id),col=s>0?r.c:'#2a2a38';
+    return`<div class="bleg-item" onclick="toast('${g.name}: ${s>0?r.i+' '+r.n+' · '+s+' pts':'No data yet'}')">
       <div class="bleg-dot" style="background:${col};box-shadow:0 0 6px ${col}"></div>
       <div class="bleg-name">${g.name}</div>
-      <div class="bleg-rank" style="color:${col}">${s>0?r.i+' '+r.n:'Unranked'}</div>
+      <div class="bleg-rank" style="color:${col}">${s>0?r.i+' '+r.n:'—'}</div>
       <div class="bleg-score">${s>0?s:''}</div>
     </div>`;
   }).join('');
+
+  document.getElementById('blegend').innerHTML = legendHTML;
+  // On mobile, also show compact legend beside SVG
+  const side = document.getElementById('blegSide');
+  if(side){
+    side.innerHTML = legendHTML;
+    // Show side legend only on mobile (CSS handles it via display:none default, JS shows it)
+    side.style.display = window.innerWidth <= 700 ? '' : 'none';
+    document.getElementById('blegend').parentElement.style.display = window.innerWidth <= 700 ? 'none' : '';
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1046,7 +1363,7 @@ function selExercise(id){
   document.getElementById('noExSel').style.display='none';
   document.getElementById('logInner').style.display='block';
   document.getElementById('selExName').textContent=ex.name;
-  const typeHint=ex.type==='added'?'Enter ADDED weight only (0 = bodyweight only)':ex.type==='db'?'Enter weight of ONE dumbbell':'Enter total bar weight';
+  const typeHint=ex.type==='added'?'Enter ADDED weight only (0 = bodyweight)':ex.type==='db'?'Enter weight of ONE dumbbell':'Enter total bar weight';
   document.getElementById('selExMeta').textContent=`${ex.gname} · ${typeHint}`;
   document.getElementById('curPrVal').textContent=val>0?`${val} kg`:'No PR yet';
   document.getElementById('curPrVal').style.color=rat?rat.color:'var(--muted)';
@@ -1055,6 +1372,10 @@ function selExercise(id){
   document.getElementById('logW').value='';
   document.getElementById('logR').value='1';
   document.getElementById('ormPrev').textContent='';
+  // On mobile, scroll the log form into view
+  if(window.innerWidth<=700){
+    setTimeout(()=>document.getElementById('logInner').scrollIntoView({behavior:'smooth',block:'start'}),100);
+  }
 }
 
 ['logW','logR'].forEach(id=>{
@@ -1236,7 +1557,10 @@ function renderRankLadder(){
 function ST(name,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  // sync the other nav (tab or bottom)
+  document.querySelectorAll(`[data-tab="${name}"]`).forEach(el=>el.classList.add('active'));
   document.getElementById('panel-'+name).classList.add('active');
   if(name==='body')renderBody();
   if(name==='history')renderHistory();
