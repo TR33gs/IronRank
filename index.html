@@ -282,7 +282,7 @@ header{padding:30px 0 24px;display:flex;align-items:center;justify-content:space
         <button class="auth-tab" onclick="setAuthTab('register',this)">Register</button>
       </div>
       <div id="authLogin">
-        <div class="auth-field"><label>Username</label><input id="loginUser" type="text" placeholder="your_username" autocomplete="username"></div>
+        <div class="auth-field"><label>Username or Email</label><input id="loginUser" type="text" placeholder="username or you@email.com" autocomplete="username"></div>
         <div class="auth-field"><label>Password</label><input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
         <div class="auth-error" id="loginError"></div>
         <button class="btn-auth" id="btnLogin" onclick="doLogin()">LOGIN</button>
@@ -386,7 +386,7 @@ header{padding:30px 0 24px;display:flex;align-items:center;justify-content:space
 
   <!-- LOG -->
   <div class="panel" id="panel-log">
-    <div class="precision-note"><strong>Optional precision logging.</strong> Log specific sets to track PRs and refine your muscle group scores beyond your profile estimates.</div>
+    <div class="precision-note"><strong>Optional precision logging.</strong> Log specific sets to track PRs and refine your muscle group scores beyond your profile estimates. <strong style="color:var(--accent3)">Women</strong> are scored against female-specific standards — a female Elite equals a male Elite on the leaderboard.</div>
     <div id="noStatWarn" style="text-align:center;padding:30px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;display:none">Set profile stats first.</div>
     <div class="log-wrap" id="logWrap">
       <div class="ex-pick">
@@ -491,7 +491,10 @@ const RANKS = [
   {n:'Platinum II',t:'Platinum',i:'💎',c:'#40efff',min:790},
   {n:'Diamond I', t:'Diamond',i:'💠',c:'#b044ff',min:860 },
   {n:'Diamond II',t:'Diamond',i:'💠',c:'#c066ff',min:930 },
-  {n:'Elite',     t:'Elite',  i:'🔥',c:'#ff4d1c',min:1000},
+  {n:'Elite',      t:'Elite',      i:'🔥',c:'#ff4d1c',min:1000},
+  {n:'Legendary I',t:'Legendary',  i:'⚡',c:'#ff9500',min:1100},
+  {n:'Legendary II',t:'Legendary', i:'⚡',c:'#ffb700',min:1200},
+  {n:'Mythic',     t:'Mythic',     i:'👑',c:'#e040fb',min:1400},
 ];
 
 // ── Exercise types ────────────────────────────────────────────────────
@@ -677,6 +680,9 @@ const sb = {
   async signIn(email, password){
     const j = await sb.req('POST','/auth/v1/token?grant_type=password',{email,password});
     sb._tok = j.access_token; sb._uid = j.user?.id;
+    // Persist refresh token and expiry so session restore can refresh proactively
+    if(j.refresh_token) localStorage.setItem('ir_ref', j.refresh_token);
+    if(j.expires_in) localStorage.setItem('ir_exp', Date.now() + j.expires_in * 1000);
     return j;
   },
   async signOut(){
@@ -691,6 +697,7 @@ const sb = {
     sb._uid = j.user?.id || sb._uid;
     localStorage.setItem('ir_tok', sb._tok);
     if (j.refresh_token) localStorage.setItem('ir_ref', j.refresh_token);
+    if (j.expires_in) localStorage.setItem('ir_exp', Date.now() + j.expires_in * 1000);
     return j;
   },
   async getSession() {
@@ -698,22 +705,30 @@ const sb = {
     const uid = localStorage.getItem('ir_uid');
     if (!uid) return null;
     sb._tok = tok; sb._uid = uid;
-    // Try the stored token
-    try {
-      await sb.select('profiles', `?id=eq.${uid}&select=id`);
-      return { access_token: tok, user: { id: uid } };
-    } catch(e) {
-      // Token likely expired — try refreshing
+
+    // Proactively refresh if token expires within 5 minutes
+    const exp = parseInt(localStorage.getItem('ir_exp') || '0', 10);
+    const nearExpiry = exp && (exp - Date.now() < 5 * 60 * 1000);
+
+    if (!nearExpiry) {
+      // Try the stored token first
       try {
-        const j = await sb.refreshToken();
-        return { access_token: j.access_token, user: { id: uid } };
-      } catch {
-        // Refresh also failed — clear everything and force re-login
-        localStorage.removeItem('ir_tok');
-        localStorage.removeItem('ir_uid');
-        localStorage.removeItem('ir_ref');
-        return null;
-      }
+        await sb.select('profiles', `?id=eq.${uid}&select=id`);
+        return { access_token: tok, user: { id: uid } };
+      } catch(e) { /* fall through to refresh */ }
+    }
+
+    // Token expired or near expiry — refresh
+    try {
+      const j = await sb.refreshToken();
+      return { access_token: j.access_token, user: { id: uid } };
+    } catch {
+      // Refresh also failed — clear everything and force re-login
+      localStorage.removeItem('ir_tok');
+      localStorage.removeItem('ir_uid');
+      localStorage.removeItem('ir_ref');
+      localStorage.removeItem('ir_exp');
+      return null;
     }
   }
 };
@@ -754,12 +769,14 @@ async function doRegister(){
 
     // Try to get token from signup response first
     let tok = signupRes.session?.access_token || signupRes.access_token;
+    let ref = signupRes.session?.refresh_token || signupRes.refresh_token;
 
     // If no token (email confirm still pending somehow), try signing in immediately
     if(!tok){
       try{
         const sinRes = await sb.signIn(email, pass);
         tok = sinRes.access_token;
+        ref = sinRes.refresh_token;
         sb._uid = sinRes.user?.id || uid;
       } catch(_){
         // Sign-in failed — email confirmation is genuinely required
@@ -774,7 +791,7 @@ async function doRegister(){
     sb._uid = sb._uid || uid;
     localStorage.setItem('ir_tok', sb._tok);
     localStorage.setItem('ir_uid', sb._uid);
-    localStorage.setItem('ir_ref', sinRes.refresh_token);
+    if(ref) localStorage.setItem('ir_ref', ref);
     // Upsert profile
     await sb.upsert('profiles',{id:sb._uid, username, display_name, email, bw:0, ht:0, sex:'male', score:0, prs:{}});
 
@@ -786,28 +803,45 @@ async function doRegister(){
 }
 
 async function doLogin(){
-  const username = document.getElementById('loginUser').value.trim().toLowerCase();
+  const raw = document.getElementById('loginUser').value.trim().toLowerCase();
   const pass = document.getElementById('loginPass').value;
   const err = document.getElementById('loginError');
-  if(!username||!pass){err.textContent='Enter username and password';return}
+  if(!raw||!pass){err.textContent='Enter username/email and password';return}
 
   setBtnLoading('btnLogin', true);
   try{
-    // Look up email by username
-    const found = await sb.select('profiles',`?username=eq.${encodeURIComponent(username)}&select=id,email`);
-    if(!found.length){err.textContent='Username not found';setBtnLoading('btnLogin',false);return}
-    const email = found[0].email;
-    if(!email){err.textContent='Account has no email — contact support';setBtnLoading('btnLogin',false);return}
+    // Determine login email — support direct email input OR username lookup
+    let email = raw;
+    if(!raw.includes('@')){
+      // It's a username — look up the email
+      const found = await sb.select('profiles',`?username=eq.${encodeURIComponent(raw)}&select=id,email`);
+      if(!found.length){err.textContent='Username not found';setBtnLoading('btnLogin',false);return}
+      email = found[0].email;
+      if(!email){
+        // Profile exists but has no email stored — ask user to enter email directly
+        err.style.color='#ffaa00';
+        err.textContent='Enter your email address instead of username to recover this account.';
+        setBtnLoading('btnLogin',false);
+        return;
+      }
+    }
 
+    // sb.signIn now saves ir_ref and ir_exp internally
     const sinRes = await sb.signIn(email, pass);
     sb._tok = sinRes.access_token; sb._uid = sinRes.user?.id;
     localStorage.setItem('ir_tok', sb._tok);
     localStorage.setItem('ir_uid', sb._uid);
-    localStorage.setItem('ir_ref', sinRes.refresh_token);
+
     // Load full profile
     const profiles = await sb.select('profiles',`?id=eq.${sb._uid}&select=*`);
     if(!profiles.length) throw new Error('Profile not found');
     const p = profiles[0];
+
+    // If profile was missing email, patch it now so future logins work by username
+    if(!p.email){
+      await sb.upsert('profiles',{id:sb._uid, email});
+      p.email = email;
+    }
 
     const hist = await sb.select('workout_history',`?user_id=eq.${sb._uid}&order=logged_at.desc&limit=100`);
 
@@ -830,6 +864,7 @@ async function doLogout(){
   localStorage.removeItem('ir_tok');
   localStorage.removeItem('ir_uid');
   localStorage.removeItem('ir_ref');
+  localStorage.removeItem('ir_exp');
   CU = null;
   document.getElementById('authScreen').style.display='flex';
   document.getElementById('mainApp').style.display='none';
@@ -896,8 +931,14 @@ function rateEx(exId,val,bw,sex){
     // For 'db', treat s[] as absolute kg thresholds, not BW ratios
     for(let i=s.length-1;i>=0;i--){
       if(r>=s[i]){
-        const lo=s[i], hi=i<s.length-1?s[i+1]:s[i]*1.3;
-        const base=i*200, pct2=Math.min(1,(r-lo)/(hi-lo));
+        const lo=s[i], hi=i<s.length-1?s[i+1]:s[i]*0.25; // last tier: elite
+        if(i===s.length-1){
+          // Above Elite for DB: each 25% above elite standard = +200
+          const bonus=Math.round(((r-s[i])/(s[i]*0.25))*200);
+          const score=1000+bonus;
+          return{label:labels[i],idx:i,color:colors[i],pct:Math.min(100,Math.round((r/s[i])*80)),score,ratioLabel};
+        }
+        const base=i*200, pct2=Math.min(1,(r-lo)/(s[i+1]-lo));
         const score=Math.round(base+pct2*200);
         const barPct=Math.min(100,Math.round((r/s[4])*100));
         return{label:labels[i],idx:i,color:colors[i],pct:barPct,score,ratioLabel};
@@ -913,9 +954,17 @@ function rateEx(exId,val,bw,sex){
   }
 
   // ── Score using ratio vs BW-ratio standards (for 'bw' and 'added') ──
-  for(let i=s.length-1;i>=0;i--){
+  // Above Elite: score continues beyond 1000 linearly (each 25% above elite = +200 pts)
+  if(r >= s[4]){
+    const eliteRange = s[4] * 0.25; // 25% above elite = +200 pts
+    const bonus = Math.round(((r - s[4]) / eliteRange) * 200);
+    const score = 1000 + bonus;
+    const barPct = Math.min(100, Math.round((r / s[4]) * 80)); // cap bar at 80% so it doesn't overflow
+    return{label:'Elite',idx:4,color:colors[4],pct:barPct,score,ratioLabel};
+  }
+  for(let i=s.length-2;i>=0;i--){
     if(r>=s[i]){
-      const lo=s[i], hi=i<s.length-1?s[i+1]:s[i]*1.25;
+      const lo=s[i], hi=s[i+1];
       const base=i*200, pct2=Math.min(1,(r-lo)/(hi-lo));
       const score=Math.round(base+pct2*200);
       const barPct=Math.min(100,Math.round((r/s[4])*100));
@@ -950,34 +999,58 @@ function overallScore(){
     const gw=g.exs.reduce((a,e)=>a+e.w,0);
     ts+=s*gw; tw+=gw;
   });
-  return tw>0?Math.min(1000,Math.round(ts/tw)):0;
+  return tw>0?Math.round(ts/tw):0;
 }
 
 function getRank(s){for(let i=RANKS.length-1;i>=0;i--)if(s>=RANKS[i].min)return RANKS[i];return RANKS[0]}
 function getRankI(s){for(let i=RANKS.length-1;i>=0;i--)if(s>=RANKS[i].min)return i;return 0}
+
+// Prestige: for Mythic+ players, every 100pts above 1400 = +1 prestige level
+// Returns {level, label, color, stars} — level 0 means not yet Mythic
+function getPrestige(s){
+  if(s < 1400) return {level:0,label:'',color:'',stars:''};
+  const level = Math.floor((s - 1400) / 100) + 1;
+  const PRESTIGE_COLORS = ['#e040fb','#ff4d1c','#ffb700','#00e5ff','#ffffff'];
+  const color = PRESTIGE_COLORS[Math.min(level-1, PRESTIGE_COLORS.length-1)];
+  const stars = level <= 3 ? '★'.repeat(level) : '★★★' + '+'.repeat(Math.min(level-3,3));
+  const suffixes = ['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+  const label = level <= 10 ? `Mythic ${suffixes[level]}` : `Mythic X+`;
+  return {level, label, color, stars};
+}
 
 // ══════════════════════════════════════════════════════════════════════
 //  RANK CARD
 // ══════════════════════════════════════════════════════════════════════
 function updateCard(s,old){
   const rk=getRank(s),ri=getRankI(s),nx=RANKS[Math.min(ri+1,RANKS.length-1)];
-  const c=rk.c;
+  const pr=getPrestige(s);
+  const c=pr.level?pr.color:rk.c;
   document.getElementById('rankCard').style.setProperty('--rc',c);
   document.getElementById('rankGlow').style.background=c;
   const b=document.getElementById('rankBadge');
   b.style.borderColor=c; b.style.boxShadow=`0 0 25px -5px ${c}`;
-  document.getElementById('rankIcon').textContent=rk.i;
+  document.getElementById('rankIcon').textContent=pr.level?'👑':rk.i;
   document.getElementById('rankTierLbl').style.color=c;
-  document.getElementById('rankTierLbl').textContent=rk.t;
-  document.getElementById('rankTitle').textContent=rk.n.toUpperCase();
+  document.getElementById('rankTierLbl').textContent=pr.level?pr.stars:rk.t;
+  document.getElementById('rankTitle').textContent=pr.level?pr.label.toUpperCase():rk.n.toUpperCase();
   document.getElementById('rankTitle').style.color=c;
-  document.getElementById('rankSub').textContent=s>0?`${rk.t} Tier — keep grinding`:'Enter your stats to rank up';
+  document.getElementById('rankSub').textContent=s>0?(pr.level?`Prestige ${pr.level} — Unbounded`:`${rk.t} Tier — keep grinding`):'Enter your stats to rank up';
   document.getElementById('progFill').style.background=c;
   document.getElementById('scoreNum').style.color=c;
   animN('scoreNum',old,s,800);
   let pct=0;
-  if(ri<RANKS.length-1){pct=Math.min(100,Math.round(((s-rk.min)/(nx.min-rk.min))*100));document.getElementById('progLabel').textContent=`Progress to ${nx.n}`}
-  else{pct=100;document.getElementById('progLabel').textContent='MAX RANK ACHIEVED'}
+  if(pr.level){
+    // Show progress within current prestige level (each 100pts = one prestige)
+    pct=Math.round(((s-1400-(pr.level-1)*100)/100)*100);
+    pct=Math.min(99,Math.max(0,pct)); // never fully fill — always room to grow
+    document.getElementById('progLabel').textContent=`Progress to ${pr.level<10?getPrestige(s+100-(s%100||100)).label:'Mythic X+'}`;
+  } else if(ri<RANKS.length-1){
+    pct=Math.min(100,Math.round(((s-rk.min)/(nx.min-rk.min))*100));
+    document.getElementById('progLabel').textContent=`Progress to ${nx.n}`;
+  } else {
+    pct=Math.min(99,Math.round(((s-rk.min)/100)*100));
+    document.getElementById('progLabel').textContent=`Progress to Mythic I`;
+  }
   document.getElementById('progPct').textContent=pct+'%';
   setTimeout(()=>document.getElementById('progFill').style.width=pct+'%',50);
 }
@@ -1395,6 +1468,7 @@ function selExercise(id){
   document.getElementById('curPrVal').style.color=rat?rat.color:'var(--muted)';
   document.getElementById('curPrRat').textContent=rat?rat.label:'—';
   document.getElementById('curPrRat').style.color=rat?rat.color:'var(--muted)';
+  window._forceLog=false;
   document.getElementById('logW').value='';
   document.getElementById('logR').value='1';
   document.getElementById('ormPrev').textContent='';
@@ -1425,12 +1499,30 @@ async function logWO(){
   const nw=epley(raw,reps);
   const ow=CU.prs[selEx]||0;
   const oldS=CU.score;
-  if(nw<=ow&&ow>0){toast(`Current PR is ${ow}kg — no improvement`,'orange');return}
+  // Allow logging below current PR (correction / deload) with confirmation
+  if(nw<=ow&&ow>0){
+    if(!window._forceLog){
+      window._forceLog = true;
+      toast(`Current PR is ${ow}kg. Tap LOG PR again to confirm ${nw}kg.`,'orange');
+      const lb=document.querySelector('#logInner .btn-p');
+      if(lb){lb.textContent='CONFIRM LOWER VALUE';lb.style.background='#ffaa00';}
+      // Reset flag and button after 5s
+      setTimeout(()=>{
+        window._forceLog=false;
+        if(lb){lb.textContent='LOG PR';lb.style.background='';}
+      },5000);
+      return;
+    }
+    window._forceLog=false; // confirmed — proceed with lower value
+    const _lb=document.querySelector('#logInner .btn-p');if(_lb){_lb.textContent='LOG PR';_lb.style.background=''}
+  } else {
+    window._forceLog=false;
+  }
   const oldRI=getRankI(oldS);
   CU.prs[selEx]=nw;
   CU.score=overallScore();
   const ex=ALEX[selEx];
-  const diff=ow>0?`+${(nw-ow).toFixed(1)}kg`:`${nw}kg`;
+  const diff=ow>0?(nw>=ow?`+${(nw-ow).toFixed(1)}kg`:`${(nw-ow).toFixed(1)}kg`):`${nw}kg`;
   if(!CU.history)CU.history=[];
   const entry={
     date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}),
@@ -1447,7 +1539,7 @@ async function logWO(){
   selExercise(selEx);
   buildExList(document.getElementById('exSearch').value);
   if(getRankI(CU.score)>oldRI)rankUp();
-  else toast(`PR! ${ex.name} → ${nw}kg (${diff})`);
+  else toast(nw>=(CU.prs[selEx]||0)?`PR! ${ex.name} → ${nw}kg (${diff})`:`Corrected: ${ex.name} → ${nw}kg (${diff})`,'orange');
   document.getElementById('logW').value='';
   document.getElementById('logR').value='1';
   document.getElementById('ormPrev').textContent='';
@@ -1527,7 +1619,9 @@ async function renderLeaderboard(){
       const isMe=u.username===CU.username;
       const isOwner=u.is_owner===true;
       const rk=getRank(u.lbScore);
-      const av=isOwner?'👑':getAvatar(u.username);
+      const pr=getPrestige(u.lbScore);
+      const av=isOwner?'👑':pr.level?'👑':getAvatar(u.username);
+      const dispColor=isOwner?'#ff4d1c':pr.level?pr.color:rk.c;
       const bwStr=u.bw?`${u.bw}kg`:'';
       const prs=u.prs||{};
       const keyLifts=[];
@@ -1536,17 +1630,17 @@ async function renderLeaderboard(){
       if(prs.deadlift) keyLifts.push(`D:${prs.deadlift}`);
       return`<div class="lb-row${isMe?' me':''}${isOwner?' owner':''}">
         <div class="lb-pos ${posClass(i)}">${isOwner?'👑':i<3?['🥇','🥈','🥉'][i]:i+1}</div>
-        <div class="lb-avatar" style="background:${isOwner?'#ff4d1c22':''+rk.c+'22'};border-color:${isOwner?'#ff4d1c':''+rk.c+'44'}">${av}</div>
+        <div class="lb-avatar" style="background:${dispColor}22;border-color:${dispColor}44">${av}</div>
         <div class="lb-info">
-          <div class="lb-user">${u.display_name||u.username}
+          <div class="lb-user">${u.display_name||u.username}${u.sex==='female'?'<span style="font-size:.65rem;color:#ff80ab;margin-left:4px;opacity:.8">♀</span>':''}
             ${isOwner?`<span class="lb-you" style="background:#ff4d1c;letter-spacing:2px">👑 OWNER</span>`:''}
             ${isMe&&!isOwner?`<span class="lb-you">YOU</span>`:''}
             ${isMe&&isOwner?`<span class="lb-you" style="background:#ffaa00;color:#000">YOU</span>`:''}
           </div>
           <div class="lb-stats">${[bwStr,...keyLifts].filter(Boolean).join(' · ')}</div>
         </div>
-        <div><div class="lb-rank-badge" style="color:${isOwner?'#ff4d1c':rk.c};border-color:${isOwner?'#ff4d1c':rk.c}">${isOwner?'👑 OWNER':rk.i+' '+rk.n}</div></div>
-        <div class="lb-score" style="color:${isOwner?'#ff4d1c':rk.c}">${u.lbScore}</div>
+        <div><div class="lb-rank-badge" style="color:${isOwner?'#ff4d1c':pr.level?pr.color:rk.c};border-color:${isOwner?'#ff4d1c':pr.level?pr.color:rk.c}">${isOwner?'👑 OWNER':pr.level?pr.stars+' '+pr.label:rk.i+' '+rk.n}</div></div>
+        <div class="lb-score" style="color:${dispColor}">${u.lbScore}${pr.level?'<span style="font-size:.55rem;opacity:.7;margin-left:3px">P'+pr.level+'</span>':''}</div>
       </div>`;
     }).join('');
   } catch(e){
@@ -1566,15 +1660,35 @@ function setLBF(f,btn){
 // ══════════════════════════════════════════════════════════════════════
 function renderRankLadder(){
   const cur=getRank(CU.score);
+  const pr=getPrestige(CU.score);
+  // Build prestige rungs above Mythic (show achieved + next 3 ahead)
+  const prestigeRungs=[];
+  const maxP=pr.level?pr.level+3:3;
+  for(let lv=1;lv<=maxP;lv++){
+    const minS=1400+(lv-1)*100;
+    const ach=CU.score>=minS;
+    const isc=pr.level===lv;
+    const PRESTIGE_COLORS=['#e040fb','#ff4d1c','#ffb700','#00e5ff','#ffffff'];
+    const c=PRESTIGE_COLORS[Math.min(lv-1,PRESTIGE_COLORS.length-1)];
+    const stars='★'.repeat(Math.min(lv,3))+(lv>3?'+'.repeat(Math.min(lv-3,3)):'');
+    const suffixes=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+    const label=lv<=10?`Mythic ${suffixes[lv]}`:'Mythic X+';
+    prestigeRungs.push(`<div class="rung${isc?' cur':''}" style="--rc:${c}">
+      <div class="rung-dot" style="background:${ach?c:'#2a2a38'};box-shadow:${ach?'0 0 7px '+c:'none'};opacity:${ach?1:.3}"></div>
+      <div class="rung-name" style="color:${ach?c:'var(--muted)'}">👑 ${label} <span style="font-size:.6rem;opacity:.7">${stars}</span></div>
+      <div class="rung-score">${minS}+</div>
+      ${isc?`<span class="rung-you" style="background:${c};color:#000">YOU</span>`:''}
+    </div>`);
+  }
   document.getElementById('rankLadder').innerHTML=RANKS.map(r=>{
-    const isc=r.n===cur.n,ach=CU.score>=r.min;
+    const isc=r.n===cur.n&&!pr.level,ach=CU.score>=r.min;
     return`<div class="rung${isc?' cur':''}" style="--rc:${r.c}">
       <div class="rung-dot" style="background:${ach?r.c:'#2a2a38'};box-shadow:${ach?'0 0 7px '+r.c:'none'};opacity:${ach?1:.3}"></div>
       <div class="rung-name" style="color:${ach?r.c:'var(--muted)'}">${r.i} ${r.n}</div>
       <div class="rung-score">${r.min}+</div>
       ${isc?`<span class="rung-you" style="background:${r.c}">YOU</span>`:''}
     </div>`;
-  }).join('');
+  }).join('')+prestigeRungs.join('');
 }
 
 // ══════════════════════════════════════════════════════════════════════
