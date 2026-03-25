@@ -471,6 +471,13 @@ header{padding:30px 0 24px;display:flex;align-items:center;justify-content:space
   </button>
 </nav>
 <script>
+
+const supabase = createClient(SUPA_URL, SUPA_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});
 // ══════════════════════════════════════════════════════════════════════
 //  DATA
 // ══════════════════════════════════════════════════════════════════════
@@ -630,12 +637,7 @@ MG.forEach(g=>g.exs.forEach(e=>{ALEX[e.id]={...e,gid:g.id,gname:g.name,gcol:g.co
 const SUPA_URL = 'https://qkbtlxgajfwcuuuatzhp.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrYnRseGdhamZ3Y3V1dWF0emhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MzUyMDIsImV4cCI6MjA5MDAxMTIwMn0.AgQC_OvaCt1XytXvpsd9xJ-qTX-kBqk5ajyOtFGdLrQ';
 
-const supabase = createClient(SUPA_URL, SUPA_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+
 // Minimal Supabase REST client (no npm needed)
 const sb = {
   _h(){ return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+(sb._tok||SUPA_KEY)}},
