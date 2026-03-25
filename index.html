@@ -473,6 +473,8 @@ header{padding:30px 0 24px;display:flex;align-items:center;justify-content:space
 <script>
 
 
+
+
 // ══════════════════════════════════════════════════════════════════════
 //  DATA
 // ══════════════════════════════════════════════════════════════════════
@@ -681,20 +683,40 @@ const sb = {
     await sb.req('POST','/auth/v1/logout').catch(()=>{});
     sb._tok=null; sb._uid=null;
   },
-  async getSession(){
-    // Try stored token
+  async refreshToken() {
+    const ref = localStorage.getItem('ir_ref');
+    if (!ref) throw new Error('No refresh token');
+    const j = await sb.req('POST', '/auth/v1/token?grant_type=refresh_token', { refresh_token: ref });
+    sb._tok = j.access_token;
+    sb._uid = j.user?.id || sb._uid;
+    localStorage.setItem('ir_tok', sb._tok);
+    if (j.refresh_token) localStorage.setItem('ir_ref', j.refresh_token);
+    return j;
+  },
+  async getSession() {
     const tok = localStorage.getItem('ir_tok');
     const uid = localStorage.getItem('ir_uid');
-    if(!tok||!uid) return null;
-    sb._tok=tok; sb._uid=uid;
-    // Verify still valid
-    try{
-      await sb.select('profiles',`?id=eq.${uid}&select=id`);
-      return {access_token:tok, user:{id:uid}};
-    }catch{ return null; }
+    if (!uid) return null;
+    sb._tok = tok; sb._uid = uid;
+    // Try the stored token
+    try {
+      await sb.select('profiles', `?id=eq.${uid}&select=id`);
+      return { access_token: tok, user: { id: uid } };
+    } catch(e) {
+      // Token likely expired — try refreshing
+      try {
+        const j = await sb.refreshToken();
+        return { access_token: j.access_token, user: { id: uid } };
+      } catch {
+        // Refresh also failed — clear everything and force re-login
+        localStorage.removeItem('ir_tok');
+        localStorage.removeItem('ir_uid');
+        localStorage.removeItem('ir_ref');
+        return null;
+      }
+    }
   }
 };
-
 let CU = null; // { id, username, display_name, bw, ht, sex, score, prs }
 
 // ── Auth helpers ──────────────────────────────────────────────────────
@@ -752,7 +774,7 @@ async function doRegister(){
     sb._uid = sb._uid || uid;
     localStorage.setItem('ir_tok', sb._tok);
     localStorage.setItem('ir_uid', sb._uid);
-
+    localStorage.setItem('ir_ref', sinRes.refresh_token);
     // Upsert profile
     await sb.upsert('profiles',{id:sb._uid, username, display_name, email, bw:0, ht:0, sex:'male', score:0, prs:{}});
 
@@ -781,7 +803,7 @@ async function doLogin(){
     sb._tok = sinRes.access_token; sb._uid = sinRes.user?.id;
     localStorage.setItem('ir_tok', sb._tok);
     localStorage.setItem('ir_uid', sb._uid);
-
+    localStorage.setItem('ir_ref', sinRes.refresh_token);
     // Load full profile
     const profiles = await sb.select('profiles',`?id=eq.${sb._uid}&select=*`);
     if(!profiles.length) throw new Error('Profile not found');
@@ -807,6 +829,7 @@ async function doLogout(){
   await sb.signOut();
   localStorage.removeItem('ir_tok');
   localStorage.removeItem('ir_uid');
+  localStorage.removeItem('ir_ref');
   CU = null;
   document.getElementById('authScreen').style.display='flex';
   document.getElementById('mainApp').style.display='none';
