@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRONRANK</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0c; --surface:#111116; --surface2:#18181f; --border:#2a2a38;
+  --text:#e8e8f0; --muted:#6b6b85; --accent:#ff4d1c; --accent2:#ffaa00; --accent3:#00d4aa;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.35}
+
+/* ── AUTH SCREEN ── */
+#authScreen{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:var(--bg)}
+.auth-box{width:100%;max-width:400px;padding:20px}
+.auth-logo{font-family:'Black Han Sans',sans-serif;font-size:2.8rem;letter-spacing:5px;text-align:center;margin-bottom:6px}
+.auth-logo span{color:var(--accent)}
+.auth-tag{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:32px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:28px;position:relative;overflow:hidden}
+.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent)}
+.auth-tabs{display:flex;gap:2px;margin-bottom:22px;background:var(--surface2);border-radius:2px;padding:3px}
+.auth-tab{flex:1;padding:8px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:1px;color:var(--muted);border:none;background:transparent;transition:all .2s}
+.auth-tab.active{background:var(--surface);color:var(--text);border-bottom:2px solid var(--accent)}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.auth-field input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:11px 13px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s}
+.auth-field input:focus{border-color:var(--accent)}
+.auth-error{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:1px;color:#ff4444;margin-bottom:10px;min-height:18px}
+.btn-auth{width:100%;padding:13px;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;letter-spacing:3px;text-transform:uppercase;background:var(--accent);color:#fff;border:none;border-radius:2px;cursor:pointer;transition:background .2s;margin-top:4px}
+.btn-auth:hover{background:#ff6640}
+
+/* ── MAIN APP ── */
+.app{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 20px 80px;display:none}
+header{padding:30px 0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);margin-bottom:28px}
+.logo{font-family:'Black Han Sans',sans-serif;font-size:1.8rem;letter-spacing:4px}
+.logo span{color:var(--accent)}
+.header-right{display:flex;align-items:center;gap:16px}
+.user-pill{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:999px}
+.user-pill strong{color:var(--text)}
+.btn-logout{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all .2s}
+.btn-logout:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── RANK CARD ── */
+.rank-card{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:28px 34px;margin-bottom:22px;position:relative;overflow:hidden}
+.rank-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--rc,#8a8a9a);transition:background .5s}
+.rank-glow{position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:var(--rc,#8a8a9a);opacity:.05;filter:blur(35px);pointer-events:none;transition:background .5s}
+.rank-header{display:flex;align-items:center;gap:20px;margin-bottom:16px}
+.rank-badge{width:72px;height:72px;border-radius:50%;border:3px solid var(--rc,#8a8a9a);display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.4);flex-shrink:0;box-shadow:0 0 25px -5px var(--rc,transparent);transition:all .5s}
+.rank-icon{font-size:1.6rem;line-height:1}
+.rank-tier-label{font-family:'Barlow Condensed',sans-serif;font-size:.48rem;letter-spacing:2px;text-transform:uppercase;margin-top:2px;transition:color .5s}
+.rank-info h2{font-family:'Black Han Sans',sans-serif;font-size:1.9rem;letter-spacing:2px;line-height:1;transition:color .5s}
+.rank-info p{font-size:.8rem;color:var(--muted);margin-top:4px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase}
+.score-row{display:flex;align-items:flex-end;gap:7px;margin-bottom:11px}
+.score-num{font-family:'Black Han Sans',sans-serif;font-size:2.6rem;line-height:1;transition:color .5s}
+.score-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.prog-label{display:flex;justify-content:space-between;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.prog-track{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.25,1,.5,1),background .5s}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:3px;flex-wrap:wrap}
+.tab{flex:1;min-width:65px;padding:9px 4px;background:transparent;border:none;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:1px;transition:all .2s}
+.tab.active{background:var(--surface2);color:var(--text);border-bottom:2px solid var(--accent)}
+.panel{display:none}.panel.active{display:block}
+
+/* ── FORMS ── */
+.fg{margin-bottom:12px}.fg label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:.63rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.fg input,.fg select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:10px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.9rem;outline:none;appearance:none;transition:border-color .2s}
+.fg input:focus,.fg select:focus{border-color:var(--accent)}
+.grid{display:grid;gap:11px;margin-bottom:13px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+.sec{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin:18px 0 9px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.sec:first-child{margin-top:0}
+.btn{padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-size:.88rem;letter-spacing:3px;text-transform:uppercase;border:none;border-radius:2px;cursor:pointer;transition:all .2s}
+.btn-p{background:var(--accent);color:#fff;width:100%;margin-top:5px}.btn-p:hover{background:#ff6640}
+.btn-s{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-s:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── LIFT CARDS ── */
+.lifts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:9px;margin-bottom:14px}
+.lc{background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:12px;position:relative}
+.lc-name{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.lc-val{font-family:'Black Han Sans',sans-serif;font-size:1.45rem}
+.lc-sub{font-size:.7rem;color:var(--muted);margin-top:1px}
+.lc-bar{height:3px;border-radius:2px;margin-top:6px}
+.lc-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.msec{margin-bottom:20px}
+.msec-hdr{display:flex;align-items:center;gap:11px;margin-bottom:8px;cursor:pointer;padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:2px;transition:border-color .2s}
+.msec-hdr:hover{border-color:var(--muted)}
+.msec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.msec-name{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;letter-spacing:2px;text-transform:uppercase;flex:1}
+.msec-rank{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:1px;text-transform:uppercase}
+.msec-body{display:none}.msec-body.open{display:block}
+
+/* ── LOG TAB ── */
+.log-wrap{display:grid;grid-template-columns:250px 1fr;gap:16px}
+.ex-pick{background:var(--surface);border:1px solid var(--border);border-radius:2px;overflow:hidden}
+.ex-search{width:100%;background:var(--surface2);border:none;border-bottom:1px solid var(--border);padding:10px 14px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.86rem;outline:none}
+.ex-search::placeholder{color:var(--muted)}
+.ex-glabel{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);padding:8px 14px 3px;border-top:1px solid var(--border)}
+.ex-item{padding:8px 14px;cursor:pointer;font-size:.83rem;transition:background .15s;display:flex;align-items:center;gap:7px;border-left:3px solid transparent}
+.ex-item:hover{background:var(--surface2)}.ex-item.sel{background:var(--surface2);border-left-color:var(--accent)}
+.ex-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ex-pr{font-size:.67rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+.ex-list{max-height:440px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.log-panel{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:24px}
+.sel-ex-title{font-family:'Black Han Sans',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:3px}
+.sel-ex-meta{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+.pr-box{background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:13px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.pr-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.pr-val{font-family:'Black Han Sans',sans-serif;font-size:1.6rem}
+.orm-preview{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;letter-spacing:1px;color:var(--accent2);height:16px;margin-bottom:4px}
+
+/* ── BODY MAP ── */
+.bmap-wrap{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+.bsvg-wrap{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.bview-toggle{display:flex;gap:3px}
+.bview-btn{padding:5px 13px;font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--muted);cursor:pointer;transition:all .2s}
+.bview-btn.active{border-color:var(--accent);color:var(--text)}
+.blegend{display:flex;flex-direction:column;gap:7px}
+.bleg-item{display:flex;align-items:center;gap:11px;padding:9px 13px;background:var(--surface);border:1px solid var(--border);border-radius:2px}
+.bleg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.bleg-name{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;flex:1}
+.bleg-rank{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:1px;text-transform:uppercase}
+.bleg-score{font-family:'Black Han Sans',sans-serif;font-size:.82rem;color:var(--muted);margin-left:7px}
+.bnote{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:1px;color:var(--muted);text-align:center}
+
+/* ── LEADERBOARD ── */
+.lb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.lb-filter{display:flex;gap:4px;flex-wrap:wrap}
+.lb-f{padding:5px 12px;font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--muted);cursor:pointer;transition:all .2s}
+.lb-f.active{border-color:var(--accent);color:var(--text)}
+.lb-table{display:flex;flex-direction:column;gap:6px}
+.lb-row{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:2px;transition:border-color .2s}
+.lb-row:hover{border-color:var(--muted)}
+.lb-row.owner{border-color:#ff4d1c;background:linear-gradient(90deg,#ff4d1c0a,transparent)}
+.lb-row.me{border-color:var(--accent);background:var(--surface2)}
+.lb-pos{font-family:'Black Han Sans',sans-serif;font-size:1.2rem;width:36px;flex-shrink:0;text-align:center}
+.lb-pos.gold{color:#ffd700}.lb-pos.silver{color:#c0c0c0}.lb-pos.bronze{color:#cd7f32}
+.lb-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;border:2px solid var(--border)}
+.lb-info{flex:1;min-width:0}
+.lb-user{font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:7px}
+.lb-you{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;background:var(--accent);color:#fff;border-radius:999px}
+.lb-stats{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:1px;color:var(--muted);margin-top:2px}
+.lb-rank-badge{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:2px;border:1px solid currentColor}
+.lb-score{font-family:'Black Han Sans',sans-serif;font-size:1.3rem;text-align:right;flex-shrink:0}
+.lb-empty{text-align:center;padding:50px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;font-size:.8rem}
+
+/* ── HISTORY ── */
+.hist-filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.hist-f{padding:4px 11px;font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--muted);cursor:pointer;transition:all .2s}
+.hist-f.active{border-color:var(--accent);color:var(--text)}
+.hist-list{display:flex;flex-direction:column;gap:6px}
+.hist-item{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:11px 15px;display:flex;align-items:center;justify-content:space-between;animation:sli .3s ease}
+@keyframes sli{from{opacity:0;transform:translateX(-7px)}to{opacity:1;transform:translateX(0)}}
+.hist-date{font-family:'Barlow Condensed',sans-serif;font-size:.63rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.hist-lift{font-weight:600;font-size:.86rem;margin-top:2px}
+.hist-sub{font-size:.7rem;color:var(--muted);font-family:'Barlow Condensed',sans-serif}
+.hist-chg{font-family:'Barlow Condensed',sans-serif;font-size:.86rem;font-weight:700;color:var(--accent3)}
+.hist-xp{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;color:var(--accent2)}
+
+/* ── RANKS ── */
+.rank-ladder{display:flex;flex-direction:column;gap:5px}
+.rung{display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:2px}
+.rung.cur{border-color:var(--rc,#8a8a9a);background:var(--surface2)}
+.rung-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.rung-name{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;flex:1}
+.rung-score{font-family:'Black Han Sans',sans-serif;font-size:.88rem;color:var(--muted)}
+.rung-you{font-size:.6rem;padding:2px 7px;border-radius:999px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;color:#000}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--surface2);border:1px solid var(--accent3);border-radius:2px;padding:12px 18px;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:1px;color:var(--accent3);z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;max-width:300px}
+.toast.show{transform:translateY(0);opacity:1}
+.rank-flash{position:fixed;inset:0;opacity:0;pointer-events:none;z-index:998}
+.rank-flash.flash{animation:rf .7s ease}
+@keyframes rf{0%{opacity:0}25%{opacity:.15}100%{opacity:0}}
+
+/* ── PRECISION NOTE ── */
+.precision-note{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:2px;padding:10px 14px;margin-bottom:16px;font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:1px;color:var(--muted);line-height:1.6}
+.precision-note strong{color:var(--accent2)}
+
+@media(max-width:700px){.g4{grid-template-columns:1fr 1fr}.log-wrap{grid-template-columns:1fr}.bmap-wrap{grid-template-columns:1fr}.ex-list{max-height:200px}}
+@media(max-width:480px){.g2,.g3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">IRON<span>RANK</span></div>
+    <div class="auth-tag">Compete. Improve. Dominate.</div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="setAuthTab('login',this)">Login</button>
+        <button class="auth-tab" onclick="setAuthTab('register',this)">Register</button>
+      </div>
+      <div id="authLogin">
+        <div class="auth-field"><label>Username</label><input id="loginUser" type="text" placeholder="your_username" autocomplete="username"></div>
+        <div class="auth-field"><label>Password</label><input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+        <div class="auth-error" id="loginError"></div>
+        <button class="btn-auth" id="btnLogin" onclick="doLogin()">LOGIN</button>
+      </div>
+      <div id="authRegister" style="display:none">
+        <div class="auth-field"><label>Username</label><input id="regUser" type="text" placeholder="choose_username" autocomplete="username"></div>
+        <div class="auth-field"><label>Display Name</label><input id="regName" type="text" placeholder="Your Name"></div>
+        <div class="auth-field"><label>Email</label><input id="regEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+        <div class="auth-field"><label>Password</label><input id="regPass" type="password" placeholder="••••••••" autocomplete="new-password"></div>
+        <div class="auth-error" id="regError"></div>
+        <button class="btn-auth" id="btnRegister" onclick="doRegister()">CREATE ACCOUNT</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rank-flash" id="rankFlash"></div>
+<div class="toast" id="toast"></div>
+
+<!-- MAIN APP -->
+<div class="app" id="mainApp">
+  <header>
+    <div class="logo">IRON<span>RANK</span></div>
+    <div class="header-right">
+      <div class="user-pill" id="userPill"></div>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- RANK CARD -->
+  <div class="rank-card" id="rankCard" style="--rc:#8a8a9a">
+    <div class="rank-glow" id="rankGlow"></div>
+    <div class="rank-header">
+      <div class="rank-badge" id="rankBadge">
+        <div class="rank-icon" id="rankIcon">🔩</div>
+        <div class="rank-tier-label" id="rankTierLbl" style="color:#8a8a9a">Iron</div>
+      </div>
+      <div class="rank-info">
+        <h2 id="rankTitle" style="color:#8a8a9a">IRON I</h2>
+        <p id="rankSub">Enter your stats to rank up</p>
+      </div>
+    </div>
+    <div class="score-row">
+      <div class="score-num" id="scoreNum" style="color:#8a8a9a">0</div>
+      <div class="score-lbl">STRENGTH SCORE</div>
+    </div>
+    <div class="prog-label"><span id="progLabel">Progress to next rank</span><span id="progPct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%;background:#8a8a9a"></div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="ST('profile',this)">Profile</button>
+    <button class="tab" onclick="ST('body',this)">Body Map</button>
+    <button class="tab" onclick="ST('log',this)">Log Workout</button>
+    <button class="tab" onclick="ST('history',this)">History</button>
+    <button class="tab" onclick="ST('leaderboard',this)">Leaderboard</button>
+    <button class="tab" onclick="ST('ranks',this)">Ranks</button>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="panel active" id="panel-profile">
+    <div class="precision-note">
+      <strong>Your rank is calculated from your profile alone.</strong> Logging individual workouts is optional — it adds precision and a personal history, but your main lifts here are what determines your rank.
+    </div>
+    <div class="sec">Body Stats</div>
+    <div class="grid g3">
+      <div class="fg"><label>Bodyweight (kg)</label><input type="number" id="bw" placeholder="85"></div>
+      <div class="fg"><label>Height (cm)</label><input type="number" id="ht" placeholder="180"></div>
+      <div class="fg"><label>Sex</label><select id="sx"><option value="male">Male</option><option value="female">Female</option></select></div>
+    </div>
+    <div id="profLifts"></div>
+    <button class="btn btn-p" onclick="calcRank()">CALCULATE & SAVE RANK</button>
+    <div id="liftsDisplay" style="margin-top:22px;display:none">
+      <div class="sec">Breakdown by Muscle Group</div>
+      <div id="liftSecs"></div>
+    </div>
+  </div>
+
+  <!-- BODY MAP -->
+  <div class="panel" id="panel-body">
+    <div class="bmap-wrap">
+      <div>
+        <div class="bsvg-wrap">
+          <div class="bview-toggle">
+            <button class="bview-btn active" onclick="setBV('front',this)">Front</button>
+            <button class="bview-btn" onclick="setBV('back',this)">Back</button>
+          </div>
+          <div id="bsvg"></div>
+          <div class="bnote">Click a muscle to see rank</div>
+        </div>
+      </div>
+      <div>
+        <div class="sec" style="margin-top:0">Muscle Rankings</div>
+        <div class="blegend" id="blegend"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="panel" id="panel-log">
+    <div class="precision-note"><strong>Optional precision logging.</strong> Log specific sets to track PRs and refine your muscle group scores beyond your profile estimates.</div>
+    <div id="noStatWarn" style="text-align:center;padding:30px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;display:none">Set profile stats first.</div>
+    <div class="log-wrap" id="logWrap">
+      <div class="ex-pick">
+        <input class="ex-search" type="text" id="exSearch" placeholder="Search exercises..." oninput="filterEx()">
+        <div class="ex-list" id="exList"></div>
+      </div>
+      <div class="log-panel">
+        <div id="noExSel" style="text-align:center;padding:36px 16px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;font-size:.75rem">← Select an exercise</div>
+        <div id="logInner" style="display:none">
+          <div class="sel-ex-title" id="selExName"></div>
+          <div class="sel-ex-meta" id="selExMeta"></div>
+          <div class="pr-box">
+            <div><div class="pr-lbl">Current PR</div><div class="pr-val" id="curPrVal">—</div></div>
+            <div style="text-align:right"><div class="pr-lbl">Level</div><div id="curPrRat" style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:1px;text-transform:uppercase">—</div></div>
+          </div>
+          <div class="grid g2" style="margin-bottom:8px">
+            <div class="fg"><label>Weight (kg)</label><input type="number" id="logW" placeholder="100" min="0" max="700"></div>
+            <div class="fg"><label>Reps (auto→1RM)</label><input type="number" id="logR" placeholder="1" min="1" max="30" value="1"></div>
+          </div>
+          <div class="orm-preview" id="ormPrev"></div>
+          <button class="btn btn-p" onclick="logWO()">LOG PR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="panel" id="panel-history">
+    <div class="hist-filters" id="histFilters"></div>
+    <div id="histEmpty" style="text-align:center;padding:50px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase">No workouts logged yet.</div>
+    <div class="hist-list" id="histList"></div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="panel" id="panel-leaderboard">
+    <div class="lb-header">
+      <div class="sec" style="margin:0">Global Rankings</div>
+      <div class="lb-filter" id="lbFilter">
+        <div class="lb-f active" onclick="setLBF('overall',this)">Overall</div>
+        <div class="lb-f" onclick="setLBF('chest',this)">Chest</div>
+        <div class="lb-f" onclick="setLBF('back',this)">Back</div>
+        <div class="lb-f" onclick="setLBF('legs',this)">Legs</div>
+        <div class="lb-f" onclick="setLBF('shoulders',this)">Shoulders</div>
+        <div class="lb-f" onclick="setLBF('arms',this)">Arms</div>
+      </div>
+    </div>
+    <div class="lb-table" id="lbTable"></div>
+  </div>
+
+  <!-- RANKS -->
+  <div class="panel" id="panel-ranks">
+    <div class="sec" style="margin-top:0">Rank Ladder</div>
+    <div class="rank-ladder" id="rankLadder"></div>
+    <div style="margin-top:18px;font-family:'Barlow Condensed',sans-serif;font-size:.76rem;color:var(--muted);letter-spacing:1px;line-height:1.9">
+      <div style="margin-bottom:4px;font-size:.62rem;letter-spacing:2px;text-transform:uppercase">Scoring Method</div>
+      Score = weighted average of all logged lift scores. Each lift is benchmarked against strength standards relative to bodyweight. A 130kg bench + 150kg squat at ~80kg bodyweight places solidly in Platinum territory. Elite lifters (2× BW squat, 1.5× BW bench) reach Diamond and Elite.
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════════════════════
+const RANKS = [
+  {n:'Iron I',    t:'Iron',    i:'🔩',c:'#8a8a9a',min:0   },
+  {n:'Iron II',   t:'Iron',   i:'🔩',c:'#9a9ab0',min:150 },
+  {n:'Bronze I',  t:'Bronze', i:'🥉',c:'#cd7f32',min:280 },
+  {n:'Bronze II', t:'Bronze', i:'🥉',c:'#d4933f',min:380 },
+  {n:'Silver I',  t:'Silver', i:'🥈',c:'#b8b8cc',min:460 },
+  {n:'Silver II', t:'Silver', i:'🥈',c:'#d0d0e0',min:530 },
+  {n:'Gold I',    t:'Gold',   i:'🥇',c:'#ffd700',min:600 },
+  {n:'Gold II',   t:'Gold',   i:'🥇',c:'#ffdf00',min:660 },
+  {n:'Platinum I',t:'Platinum',i:'💎',c:'#00e5ff',min:720 },
+  {n:'Platinum II',t:'Platinum',i:'💎',c:'#40efff',min:790},
+  {n:'Diamond I', t:'Diamond',i:'💠',c:'#b044ff',min:860 },
+  {n:'Diamond II',t:'Diamond',i:'💠',c:'#c066ff',min:930 },
+  {n:'Elite',     t:'Elite',  i:'🔥',c:'#ff4d1c',min:1000},
+];
+
+// ── Exercise types ────────────────────────────────────────────────────
+// type:'bw'   → standards are × bodyweight ratios (barbell lifts, machines)
+//               user enters the bar/stack weight. ratio = weight/bw
+//
+// type:'added'→ user enters ADDED weight only (belt/vest). bodyweight
+//               is added before scoring. ratio = (weight+bw)/bw
+//               e.g. 40kg added pull-up on 80kg person → (40+80)/80 = 1.5 → Advanced
+//               e.g. bodyweight-only pull-up → enter 0 → 80/80 = 1.0 → Beginner/Novice
+//
+// type:'db'   → user enters weight of ONE dumbbell.
+//               standards are absolute kg-per-dumbbell values, NOT bw ratios.
+//               sm/sf hold [beg,nov,int,adv,eli] in kg (for ~80kg male / ~60kg female)
+//               scoring normalises by (val / elite_standard)
+//
+// type:'db2'  → user enters combined weight of BOTH dumbbells (some people prefer this)
+//               treated same as 'db' but halved first — not used currently
+// ─────────────────────────────────────────────────────────────────────
+
+const MG = [
+  {id:'chest',name:'Chest',color:'#e05555',exs:[
+    // barbell/machine lifts → BW ratio
+    {id:'bench',    name:'Bench Press',           type:'bw',    w:1.0, sm:[.65,.85,1.1,1.4,1.75],  sf:[.4,.55,.7,.9,1.1]},
+    {id:'incline',  name:'Incline Bench',          type:'bw',    w:.85, sm:[.5,.7,.9,1.15,1.4],     sf:[.3,.45,.6,.78,.95]},
+    {id:'decline',  name:'Decline Bench',          type:'bw',    w:.75, sm:[.6,.8,1.0,1.25,1.55],   sf:[.35,.5,.65,.83,1.02]},
+    // Dumbbell press: enter weight of ONE dumbbell. Standards in kg per DB for ~80kg male.
+    // 20kg DB = novice, 30kg = intermediate, 40kg = advanced, 52kg = elite
+    {id:'dbpress',  name:'Dumbbell Press (per DB)', type:'db',   w:.75, sm:[14,20,30,40,52],          sf:[8,12,18,25,33]},
+    // Added weight dips: enter ADDED kg (0 = bodyweight only)
+    {id:'dips',     name:'Weighted Dips (added kg)',type:'added', w:.7,  sm:[.9,1.1,1.35,1.6,1.9],   sf:[.65,.82,1.02,1.25,1.52]},
+    {id:'cfly',     name:'Cable Fly',              type:'bw',    w:.5,  sm:[.17,.27,.37,.47,.6],      sf:[.1,.16,.23,.3,.4]},
+    {id:'pecdeck',  name:'Pec Deck',               type:'bw',    w:.5,  sm:[.25,.4,.55,.7,.88],       sf:[.15,.24,.34,.44,.56]},
+  ]},
+  {id:'back',name:'Back',color:'#5588e0',exs:[
+    {id:'deadlift', name:'Deadlift',               type:'bw',    w:1.1, sm:[1.0,1.3,1.6,2.0,2.5],   sf:[.65,.9,1.15,1.45,1.8]},
+    {id:'rdl',      name:'Romanian Deadlift',       type:'bw',    w:.9,  sm:[.7,.95,1.2,1.5,1.85],   sf:[.45,.65,.85,1.07,1.32]},
+    {id:'row',      name:'Barbell Row',             type:'bw',    w:.85, sm:[.5,.7,.9,1.15,1.42],    sf:[.32,.47,.62,.8,.98]},
+    // Dumbbell row: enter ONE dumbbell. 30kg = novice, 45kg = intermediate, 60kg = advanced
+    {id:'dbrow',    name:'Dumbbell Row (per DB)',   type:'db',    w:.7,  sm:[18,28,40,55,70],          sf:[10,16,24,34,45]},
+    // Weighted pull-up: enter ADDED weight (enter 0 for bodyweight)
+    // 80kg person + 0 added = 80/80=1.0 → borderline Beginner/Novice
+    // 80kg person + 40kg = 120/80=1.5 → Advanced ✓
+    // 80kg person + 60kg = 140/80=1.75 → Elite
+    {id:'pullup',   name:'Weighted Pull-up (added)',type:'added', w:.8,  sm:[.9,1.1,1.35,1.6,1.9],   sf:[.7,.87,1.07,1.3,1.58]},
+    {id:'latpull',  name:'Lat Pulldown',            type:'bw',    w:.7,  sm:[.5,.7,.9,1.1,1.35],      sf:[.33,.48,.63,.8,1.0]},
+    {id:'cabrow',   name:'Seated Cable Row',        type:'bw',    w:.65, sm:[.45,.65,.85,1.07,1.3],   sf:[.28,.42,.57,.72,.88]},
+    {id:'tbar',     name:'T-Bar Row',               type:'bw',    w:.8,  sm:[.42,.6,.8,1.02,1.25],    sf:[.25,.38,.52,.67,.83]},
+    {id:'goodam',   name:'Good Morning',            type:'bw',    w:.6,  sm:[.3,.45,.6,.78,.97],      sf:[.18,.28,.38,.5,.63]},
+  ]},
+  {id:'shoulders',name:'Shoulders',color:'#55c0e0',exs:[
+    {id:'ohp',      name:'Overhead Press',          type:'bw',    w:.85, sm:[.38,.52,.67,.82,1.0],    sf:[.2,.3,.4,.52,.65]},
+    {id:'pushpr',   name:'Push Press',              type:'bw',    w:.8,  sm:[.47,.65,.83,1.03,1.27],  sf:[.25,.38,.52,.67,.83]},
+    // DB shoulder press per dumbbell: 16kg = novice, 24kg = intermediate, 34kg = advanced
+    {id:'dbohp',    name:'DB Shoulder Press (per DB)',type:'db',  w:.7,  sm:[10,16,24,34,44],          sf:[6,10,15,21,28]},
+    // Lateral raise per dumbbell
+    {id:'lateral',  name:'Lateral Raise (per DB)',  type:'db',    w:.4,  sm:[6,10,14,20,27],           sf:[3,5,8,12,16]},
+    {id:'frontr',   name:'Front Raise (per DB)',    type:'db',    w:.35, sm:[6,10,14,19,25],            sf:[3,5,7,10,14]},
+    {id:'facepull', name:'Face Pull',               type:'bw',    w:.4,  sm:[.17,.27,.37,.47,.58],     sf:[.1,.16,.22,.29,.37]},
+    {id:'uprow',    name:'Upright Row',             type:'bw',    w:.5,  sm:[.25,.37,.5,.63,.78],      sf:[.15,.23,.32,.41,.52]},
+    // Arnold press per dumbbell
+    {id:'arnold',   name:'Arnold Press (per DB)',   type:'db',    w:.65, sm:[10,15,22,30,40],          sf:[6,9,13,18,24]},
+  ]},
+  {id:'legs',name:'Legs',color:'#55e0a0',exs:[
+    {id:'squat',    name:'Back Squat',              type:'bw',    w:1.15,sm:[.85,1.1,1.4,1.75,2.2],   sf:[.55,.75,.97,1.22,1.52]},
+    {id:'frontsq',  name:'Front Squat',             type:'bw',    w:.9,  sm:[.6,.82,1.05,1.3,1.62],   sf:[.38,.55,.72,.92,1.15]},
+    {id:'legpr',    name:'Leg Press',               type:'bw',    w:.7,  sm:[1.3,1.8,2.3,2.85,3.5],   sf:[.85,1.22,1.62,2.05,2.52]},
+    {id:'hacksq',   name:'Hack Squat',              type:'bw',    w:.8,  sm:[.68,.92,1.17,1.47,1.83],  sf:[.43,.6,.78,.98,1.22]},
+    {id:'legcurl',  name:'Leg Curl',                type:'bw',    w:.55, sm:[.25,.38,.52,.65,.8],      sf:[.15,.23,.32,.42,.52]},
+    {id:'legext',   name:'Leg Extension',           type:'bw',    w:.55, sm:[.3,.45,.6,.75,.92],       sf:[.18,.28,.38,.5,.63]},
+    {id:'hipth',    name:'Hip Thrust',              type:'bw',    w:.8,  sm:[.7,1.0,1.3,1.62,2.0],    sf:[.52,.77,1.03,1.3,1.6]},
+    {id:'lunge',    name:'Walking Lunge (total)',   type:'bw',    w:.65, sm:[.25,.4,.55,.7,.87],       sf:[.15,.25,.37,.5,.63]},
+    {id:'sumo',     name:'Sumo Deadlift',           type:'bw',    w:1.0, sm:[.92,1.22,1.55,1.92,2.4], sf:[.6,.83,1.07,1.35,1.67]},
+    {id:'bss',      name:'Bulgarian Split Squat',   type:'bw',    w:.75, sm:[.33,.48,.65,.83,1.03],    sf:[.2,.32,.45,.58,.72]},
+  ]},
+  {id:'arms',name:'Arms',color:'#e0b055',exs:[
+    {id:'curl',     name:'Barbell Curl',            type:'bw',    w:.6,  sm:[.25,.36,.48,.6,.73],      sf:[.15,.22,.3,.38,.47]},
+    // Dumbbell curls per dumbbell
+    {id:'hammer',   name:'Hammer Curl (per DB)',    type:'db',    w:.55, sm:[12,18,25,34,44],           sf:[6,10,15,20,27]},
+    {id:'skull',    name:'Skull Crusher',           type:'bw',    w:.55, sm:[.2,.3,.42,.55,.68],       sf:[.12,.18,.26,.34,.42]},
+    {id:'tripush',  name:'Tricep Pushdown',         type:'bw',    w:.5,  sm:[.25,.37,.5,.63,.78],      sf:[.15,.22,.3,.38,.47]},
+    {id:'cgbench',  name:'Close-Grip Bench',        type:'bw',    w:.75, sm:[.47,.63,.8,.98,1.2],      sf:[.27,.38,.5,.63,.78]},
+    {id:'preacher', name:'Preacher Curl',           type:'bw',    w:.5,  sm:[.18,.27,.37,.47,.58],     sf:[.1,.16,.22,.29,.36]},
+    {id:'concurl',  name:'Concentration Curl (per DB)',type:'db', w:.45, sm:[8,13,18,25,32],            sf:[4,7,10,14,19]},
+    {id:'cablcurl', name:'Cable Curl',              type:'bw',    w:.45, sm:[.2,.3,.4,.52,.63],        sf:[.12,.18,.26,.34,.42]},
+  ]},
+  {id:'core',name:'Core',color:'#c0e055',exs:[
+    {id:'abwheel',  name:'Ab Wheel (added weight)', type:'added', w:.5,  sm:[.9,1.05,1.2,1.4,1.65],   sf:[.7,.82,.97,1.13,1.33]},
+    {id:'cabcrunch',name:'Cable Crunch',            type:'bw',    w:.5,  sm:[.25,.4,.55,.68,.83],      sf:[.15,.23,.32,.41,.52]},
+    {id:'dragon',   name:'Dragon Flag (added weight)',type:'added',w:.5,  sm:[.9,1.05,1.2,1.4,1.65],  sf:[.7,.82,.97,1.13,1.33]},
+    {id:'landmine', name:'Landmine Rotation',       type:'bw',    w:.4,  sm:[.08,.13,.18,.25,.32],     sf:[.05,.08,.12,.17,.22]},
+  ]},
+  {id:'calves',name:'Calves',color:'#9055e0',exs:[
+    {id:'scalfr',   name:'Standing Calf Raise',     type:'bw',    w:.6,  sm:[.43,.72,.97,1.25,1.55],  sf:[.25,.45,.63,.83,1.02]},
+    {id:'seatcalf', name:'Seated Calf Raise',       type:'bw',    w:.5,  sm:[.25,.45,.63,.82,1.02],   sf:[.17,.3,.43,.57,.72]},
+    {id:'donkey',   name:'Donkey Calf Raise',       type:'bw',    w:.5,  sm:[.33,.57,.8,1.03,1.28],   sf:[.2,.37,.53,.68,.85]},
+  ]},
+];
+
+const ALEX = {};
+MG.forEach(g=>g.exs.forEach(e=>{ALEX[e.id]={...e,gid:g.id,gname:g.name,gcol:g.color}}));
+
+// ══════════════════════════════════════════════════════════════════════
+//  SUPABASE  
+//  Tables needed — run this once in Supabase SQL editor:
+//
+//  create table profiles (
+//    id uuid primary key references auth.users(id) on delete cascade,
+//    username text unique not null,
+//    display_name text not null,
+//    email text,
+//    bw numeric default 0,
+//    ht numeric default 0,
+//    sex text default 'male',
+//    score integer default 0,
+//    prs jsonb default '{}'::jsonb,
+//    updated_at timestamptz default now()
+//  );
+//  alter table profiles enable row level security;
+//  create policy "Users manage own profile" on profiles
+//    for all using (auth.uid() = id) with check (auth.uid() = id);
+//  create policy "Anyone can read profiles" on profiles
+//    for select using (true);
+//
+//  create table workout_history (
+//    id bigint generated always as identity primary key,
+//    user_id uuid references auth.users(id) on delete cascade,
+//    lift_name text, group_name text, group_id text,
+//    from_kg numeric, to_kg numeric, diff text,
+//    xp integer, rank_name text, reps_note text,
+//    logged_at timestamptz default now()
+//  );
+//  alter table workout_history enable row level security;
+//  create policy "Users manage own history" on workout_history
+//    for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+//  create policy "Anyone can read history" on workout_history
+//    for select using (true);
+// ══════════════════════════════════════════════════════════════════════
+
+const SUPA_URL = 'https://qkbtlxgajfwcuuuatzhp.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrYnRseGdhamZ3Y3V1dWF0emhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MzUyMDIsImV4cCI6MjA5MDAxMTIwMn0.AgQC_OvaCt1XytXvpsd9xJ-qTX-kBqk5ajyOtFGdLrQ';
+
+// Minimal Supabase REST client (no npm needed)
+const sb = {
+  _h(){ return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+(sb._tok||SUPA_KEY)}},
+  _tok: null, _uid: null,
+
+  async req(method, path, body){
+    const r = await fetch(SUPA_URL+path, {method, headers:sb._h(), body:body?JSON.stringify(body):undefined});
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.message||j.error_description||JSON.stringify(j));
+    return j;
+  },
+
+  async select(table, query=''){
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}${query}`, {headers:{...sb._h(),'Accept':'application/json'}});
+    if(!r.ok){ const j=await r.json(); throw new Error(j.message||JSON.stringify(j)); }
+    return r.json();
+  },
+
+  async upsert(table, row){
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}`, {
+      method:'POST', headers:{...sb._h(),'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify(row)
+    });
+    if(!r.ok){ const j=await r.json(); throw new Error(j.message||JSON.stringify(j)); }
+    return r.json().catch(()=>({}));
+  },
+
+  async insert(table, row){
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}`, {
+      method:'POST', headers:{...sb._h(),'Prefer':'return=representation'},
+      body:JSON.stringify(row)
+    });
+    if(!r.ok){ const j=await r.json(); throw new Error(j.message||JSON.stringify(j)); }
+    return r.json().catch(()=>([]));
+  },
+
+  async signUp(email, password){
+    return sb.req('POST','/auth/v1/signup',{email,password});
+  },
+  async signIn(email, password){
+    const j = await sb.req('POST','/auth/v1/token?grant_type=password',{email,password});
+    sb._tok = j.access_token; sb._uid = j.user?.id;
+    return j;
+  },
+  async signOut(){
+    await sb.req('POST','/auth/v1/logout').catch(()=>{});
+    sb._tok=null; sb._uid=null;
+  },
+  async getSession(){
+    // Try stored token
+    const tok = localStorage.getItem('ir_tok');
+    const uid = localStorage.getItem('ir_uid');
+    if(!tok||!uid) return null;
+    sb._tok=tok; sb._uid=uid;
+    // Verify still valid
+    try{
+      await sb.select('profiles',`?id=eq.${uid}&select=id`);
+      return {access_token:tok, user:{id:uid}};
+    }catch{ return null; }
+  }
+};
+
+let CU = null; // { id, username, display_name, bw, ht, sex, score, prs }
+
+// ── Auth helpers ──────────────────────────────────────────────────────
+function setAuthTab(t,btn){
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('authLogin').style.display=t==='login'?'':'none';
+  document.getElementById('authRegister').style.display=t==='register'?'':'none';
+  document.getElementById('loginError').textContent='';
+  document.getElementById('regError').textContent='';
+}
+
+async function doRegister(){
+  const username = document.getElementById('regUser').value.trim().toLowerCase();
+  const display_name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('regPass').value;
+  const err = document.getElementById('regError');
+  if(!username||!display_name||!email||!pass){err.textContent='All fields required';return}
+  if(username.length<3){err.textContent='Username must be 3+ characters';return}
+  if(pass.length<6){err.textContent='Password must be 6+ characters';return}
+  if(!email.includes('@')){err.textContent='Enter a valid email';return}
+
+  setBtnLoading('btnRegister', true);
+  err.style.color='#ff4444';
+  try{
+    // Check username not taken
+    const existing = await sb.select('profiles',`?username=eq.${encodeURIComponent(username)}&select=id`);
+    if(existing.length>0){err.textContent='Username already taken';return}
+
+    // Sign up
+    const signupRes = await sb.signUp(email, pass);
+    const uid = signupRes.user?.id || signupRes.id;
+    if(!uid) throw new Error(signupRes.message||'Signup failed');
+
+    // Try to get token from signup response first
+    let tok = signupRes.session?.access_token || signupRes.access_token;
+
+    // If no token (email confirm still pending somehow), try signing in immediately
+    if(!tok){
+      try{
+        const sinRes = await sb.signIn(email, pass);
+        tok = sinRes.access_token;
+        sb._uid = sinRes.user?.id || uid;
+      } catch(_){
+        // Sign-in failed — email confirmation is genuinely required
+        err.style.color='var(--accent3)';
+        err.textContent='✓ Account created! Check your email to confirm, then log in.';
+        setBtnLoading('btnRegister',false);
+        return;
+      }
+    }
+
+    sb._tok = tok;
+    sb._uid = sb._uid || uid;
+    localStorage.setItem('ir_tok', sb._tok);
+    localStorage.setItem('ir_uid', sb._uid);
+
+    // Upsert profile
+    await sb.upsert('profiles',{id:sb._uid, username, display_name, email, bw:0, ht:0, sex:'male', score:0, prs:{}});
+
+    CU = {id:sb._uid, username, display_name, email, bw:0, ht:0, sex:'male', score:0, prs:{}, history:[]};
+    showApp();
+  } catch(e){
+    err.textContent = e.message.includes('already registered') ? 'Email already in use — try logging in' : e.message;
+  } finally { setBtnLoading('btnRegister',false); }
+}
+
+async function doLogin(){
+  const username = document.getElementById('loginUser').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  if(!username||!pass){err.textContent='Enter username and password';return}
+
+  setBtnLoading('btnLogin', true);
+  try{
+    // Look up email by username
+    const found = await sb.select('profiles',`?username=eq.${encodeURIComponent(username)}&select=id,email`);
+    if(!found.length){err.textContent='Username not found';setBtnLoading('btnLogin',false);return}
+    const email = found[0].email;
+    if(!email){err.textContent='Account has no email — contact support';setBtnLoading('btnLogin',false);return}
+
+    const sinRes = await sb.signIn(email, pass);
+    sb._tok = sinRes.access_token; sb._uid = sinRes.user?.id;
+    localStorage.setItem('ir_tok', sb._tok);
+    localStorage.setItem('ir_uid', sb._uid);
+
+    // Load full profile
+    const profiles = await sb.select('profiles',`?id=eq.${sb._uid}&select=*`);
+    if(!profiles.length) throw new Error('Profile not found');
+    const p = profiles[0];
+
+    const hist = await sb.select('workout_history',`?user_id=eq.${sb._uid}&order=logged_at.desc&limit=100`);
+
+    CU = {...p, history: hist.map(h=>({
+      date: new Date(h.logged_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}),
+      lift:h.lift_name, group:h.group_name, gid:h.group_id,
+      from:h.from_kg, to:h.to_kg, diff:h.diff, xp:h.xp,
+      rank:h.rank_name, reps:h.reps_note
+    }))};
+
+    showApp();
+  } catch(e){
+    err.textContent = (e.message.includes('Invalid login')||e.message.includes('invalid_grant'))
+      ? 'Wrong password' : e.message;
+  } finally { setBtnLoading('btnLogin',false); }
+}
+
+async function doLogout(){
+  await sb.signOut();
+  localStorage.removeItem('ir_tok');
+  localStorage.removeItem('ir_uid');
+  CU = null;
+  document.getElementById('authScreen').style.display='flex';
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+function showApp(){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  bootApp();
+}
+
+function setBtnLoading(id, loading){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.disabled=loading;
+  el.textContent=loading?(id==='btnLogin'?'LOGGING IN…':'CREATING ACCOUNT…'):(id==='btnLogin'?'LOGIN':'CREATE ACCOUNT');
+}
+
+async function saveUser(){
+  await sb.upsert('profiles',{
+    id:CU.id, username:CU.username, display_name:CU.display_name,
+    bw:CU.bw, ht:CU.ht, sex:CU.sex, score:CU.score, prs:CU.prs,
+    updated_at: new Date().toISOString()
+  });
+}
+
+async function saveHistoryEntry(entry){
+  await sb.insert('workout_history',{
+    user_id:CU.id, lift_name:entry.lift, group_name:entry.group, group_id:entry.gid,
+    from_kg:entry.from, to_kg:entry.to, diff:entry.diff, xp:entry.xp,
+    rank_name:entry.rank, reps_note:entry.reps||null
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  SCORING
+// ══════════════════════════════════════════════════════════════════════
+function epley(w,r){return r<=1?w:Math.round(w*(1+r/30))}
+
+// Rate a single lift: returns {label, idx, color, pct, score, ratio, ratioLabel}
+function rateEx(exId,val,bw,sex){
+  const ex=ALEX[exId];
+  if(!ex||!bw) return{label:'Untrained',idx:-1,color:'#3a3a4a',pct:0,score:0};
+  const s=sex==='male'?ex.sm:ex.sf;
+  const labels=['Beginner','Novice','Intermediate','Advanced','Elite'];
+  const colors=['#cd7f32','#b8b8cc','#ffd700','#00e5ff','#ff4d1c'];
+
+  // ── Compute the comparison value (r) and display label ──────────────
+  let r, ratioLabel;
+  if(ex.type==='added'){
+    // val = added weight. total lifted = val + bw. Compare total/bw
+    if(val==null||val==='') return{label:'Untrained',idx:-1,color:'#3a3a4a',pct:0,score:0};
+    const total=parseFloat(val)+bw;
+    r=total/bw;
+    ratioLabel=`${(+val||0)}kg added → ${total.toFixed(0)}kg total (${r.toFixed(2)}× BW)`;
+  } else if(ex.type==='db'){
+    // val = weight of one dumbbell. Standards are absolute kg values.
+    // r = val / s[4] (normalised to elite)
+    if(!val) return{label:'Untrained',idx:-1,color:'#3a3a4a',pct:0,score:0};
+    r=parseFloat(val); // raw kg, compared against absolute standards
+    ratioLabel=`${r}kg per dumbbell`;
+    // For 'db', treat s[] as absolute kg thresholds, not BW ratios
+    for(let i=s.length-1;i>=0;i--){
+      if(r>=s[i]){
+        const lo=s[i], hi=i<s.length-1?s[i+1]:s[i]*1.3;
+        const base=i*200, pct2=Math.min(1,(r-lo)/(hi-lo));
+        const score=Math.round(base+pct2*200);
+        const barPct=Math.min(100,Math.round((r/s[4])*100));
+        return{label:labels[i],idx:i,color:colors[i],pct:barPct,score,ratioLabel};
+      }
+    }
+    const pct2=Math.min(100,Math.round((r/s[0])*100));
+    return{label:'Untrained',idx:-1,color:'#3a3a4a',pct:pct2,score:Math.round((r/s[4])*150),ratioLabel};
+  } else {
+    // type='bw': standard BW ratio
+    if(!val) return{label:'Untrained',idx:-1,color:'#3a3a4a',pct:0,score:0};
+    r=parseFloat(val)/bw;
+    ratioLabel=`${r.toFixed(2)}× BW`;
+  }
+
+  // ── Score using ratio vs BW-ratio standards (for 'bw' and 'added') ──
+  for(let i=s.length-1;i>=0;i--){
+    if(r>=s[i]){
+      const lo=s[i], hi=i<s.length-1?s[i+1]:s[i]*1.25;
+      const base=i*200, pct2=Math.min(1,(r-lo)/(hi-lo));
+      const score=Math.round(base+pct2*200);
+      const barPct=Math.min(100,Math.round((r/s[4])*100));
+      return{label:labels[i],idx:i,color:colors[i],pct:barPct,score,ratioLabel};
+    }
+  }
+  const pct2=Math.min(1,r/s[0]);
+  return{label:'Untrained',idx:-1,color:'#3a3a4a',pct:Math.round(pct2*100),score:Math.round(pct2*150),ratioLabel};
+}
+
+// Convenience: rate for any user's bw/sex (used in leaderboard)
+function rateExForUser(exId,val,bw,sex){ return rateEx(exId,val,bw,sex); }
+
+// Group score: weighted avg of all logged lifts in group (0–1000 scale)
+function gScore(gid){
+  const g=MG.find(x=>x.id===gid); if(!g||!CU.bw) return 0;
+  let tw=0,ts=0;
+  g.exs.forEach(ex=>{
+    const v=CU.prs[ex.id]; if(v==null||v==='') return;
+    const r=rateEx(ex.id,v,CU.bw,CU.sex);
+    if(!r.score) return;
+    ts+=r.score*ex.w; tw+=ex.w;
+  });
+  return tw>0?Math.round(ts/tw):0;
+}
+
+// Overall score: weighted avg across groups that have data
+function overallScore(){
+  let tw=0,ts=0;
+  MG.forEach(g=>{
+    const s=gScore(g.id); if(!s) return;
+    const gw=g.exs.reduce((a,e)=>a+e.w,0);
+    ts+=s*gw; tw+=gw;
+  });
+  return tw>0?Math.min(1000,Math.round(ts/tw)):0;
+}
+
+function getRank(s){for(let i=RANKS.length-1;i>=0;i--)if(s>=RANKS[i].min)return RANKS[i];return RANKS[0]}
+function getRankI(s){for(let i=RANKS.length-1;i>=0;i--)if(s>=RANKS[i].min)return i;return 0}
+
+// ══════════════════════════════════════════════════════════════════════
+//  RANK CARD
+// ══════════════════════════════════════════════════════════════════════
+function updateCard(s,old){
+  const rk=getRank(s),ri=getRankI(s),nx=RANKS[Math.min(ri+1,RANKS.length-1)];
+  const c=rk.c;
+  document.getElementById('rankCard').style.setProperty('--rc',c);
+  document.getElementById('rankGlow').style.background=c;
+  const b=document.getElementById('rankBadge');
+  b.style.borderColor=c; b.style.boxShadow=`0 0 25px -5px ${c}`;
+  document.getElementById('rankIcon').textContent=rk.i;
+  document.getElementById('rankTierLbl').style.color=c;
+  document.getElementById('rankTierLbl').textContent=rk.t;
+  document.getElementById('rankTitle').textContent=rk.n.toUpperCase();
+  document.getElementById('rankTitle').style.color=c;
+  document.getElementById('rankSub').textContent=s>0?`${rk.t} Tier — keep grinding`:'Enter your stats to rank up';
+  document.getElementById('progFill').style.background=c;
+  document.getElementById('scoreNum').style.color=c;
+  animN('scoreNum',old,s,800);
+  let pct=0;
+  if(ri<RANKS.length-1){pct=Math.min(100,Math.round(((s-rk.min)/(nx.min-rk.min))*100));document.getElementById('progLabel').textContent=`Progress to ${nx.n}`}
+  else{pct=100;document.getElementById('progLabel').textContent='MAX RANK ACHIEVED'}
+  document.getElementById('progPct').textContent=pct+'%';
+  setTimeout(()=>document.getElementById('progFill').style.width=pct+'%',50);
+}
+
+function animN(id,from,to,dur){
+  const el=document.getElementById(id),st=performance.now();
+  const tick=now=>{const t=Math.min((now-st)/dur,1);el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-t,3)));if(t<1)requestAnimationFrame(tick)};
+  requestAnimationFrame(tick);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  PROFILE TAB
+// ══════════════════════════════════════════════════════════════════════
+function buildProfLifts(){
+  document.getElementById('profLifts').innerHTML=MG.map(g=>`
+    <div class="sec" style="color:${g.color}">${g.name}</div>
+    <div class="grid g4">${g.exs.map(e=>{
+      const hint=e.type==='added'?'added kg':e.type==='db'?'kg/DB':'kg';
+      return`<div class="fg"><label>${e.name}</label>
+      <input type="number" id="pr_${e.id}" placeholder="${hint}" min="0" max="800" value="${CU.prs[e.id]!=null?CU.prs[e.id]:''}">
+      </div>`;
+    }).join('')}</div>`).join('');
+}
+
+async function calcRank(){
+  const bw=parseFloat(document.getElementById('bw').value);
+  const ht=parseFloat(document.getElementById('ht').value);
+  const sx=document.getElementById('sx').value;
+  if(!bw||!ht){toast('Enter bodyweight and height first','red');return}
+  const old=CU.score;
+  CU.bw=bw; CU.ht=ht; CU.sex=sx;
+  MG.forEach(g=>g.exs.forEach(e=>{
+    const inp=document.getElementById('pr_'+e.id);
+    if(!inp) return;
+    const v=parseFloat(inp.value);
+    if(!isNaN(v)&&v>0) CU.prs[e.id]=v;
+  }));
+  CU.score=overallScore();
+  try{
+    await saveUser();
+    if(old>0&&getRankI(CU.score)>getRankI(old))rankUp();
+    updateCard(CU.score,old);
+    renderLiftSecs();
+    renderLeaderboard();
+    toast('Rank saved! 💪');
+  } catch(e){ toast('Save failed: '+e.message,'red'); }
+}
+
+function renderLiftSecs(){
+  document.getElementById('liftSecs').innerHTML=MG.map(g=>{
+    const gs=gScore(g.id),gr=getRank(gs);
+    const has=g.exs.some(e=>CU.prs[e.id]>0); if(!has) return'';
+    return`<div class="msec">
+      <div class="msec-hdr" onclick="togSec('${g.id}')">
+        <div class="msec-dot" style="background:${g.color};box-shadow:0 0 7px ${g.color}"></div>
+        <div class="msec-name">${g.name}</div>
+        <div class="msec-rank" style="color:${gr.c}">${gr.i} ${gr.n} · ${gs}pts</div>
+        <div style="font-size:.68rem;color:var(--muted)" id="tog_${g.id}">▼</div>
+      </div>
+      <div class="msec-body open" id="sec_${g.id}">
+        <div class="lifts-grid">${g.exs.filter(e=>CU.prs[e.id]!=null&&CU.prs[e.id]!=='').map(e=>{
+          const v=CU.prs[e.id],r=rateEx(e.id,v,CU.bw,CU.sex);
+          const typeNote=e.type==='added'?'added':e.type==='db'?'per DB':'';
+          return`<div class="lc" style="border-color:${r.color}28">
+            <div class="lc-name">${e.name}</div>
+            <div class="lc-val" style="color:${r.color}">${v}kg${typeNote?` <span style="font-size:.55rem;opacity:.7">${typeNote}</span>`:''}</div>
+            <div class="lc-sub">${r.ratioLabel||''}</div>
+            <div class="lc-bar" style="background:${r.color};width:${r.pct}%"></div>
+            <div class="lc-lbl" style="color:${r.color}">${r.label}</div>
+          </div>`}).join('')}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('liftsDisplay').style.display='block';
+}
+
+function togSec(id){
+  const b=document.getElementById('sec_'+id),t=document.getElementById('tog_'+id);
+  b.classList.toggle('open');t.textContent=b.classList.contains('open')?'▼':'▶';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  BODY MAP
+// ══════════════════════════════════════════════════════════════════════
+let bview='front';
+function setBV(v,btn){bview=v;document.querySelectorAll('.bview-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderBody()}
+function gcol(gid){const s=gScore(gid);return s>0?getRank(s).c:'#252530'}
+
+function renderBody(){
+  const c={};MG.forEach(g=>c[g.id]=gcol(g.id));
+  const F=`<svg viewBox="0 0 200 410" width="168" height="320" xmlns="http://www.w3.org/2000/svg">
+  <defs><filter id="gf"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <ellipse cx="100" cy="25" rx="19" ry="23" fill="#1c1c28" stroke="#333348" stroke-width="1.5"/>
+  <rect x="92" y="46" width="16" height="12" rx="3" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="63" cy="72" rx="18" ry="13" fill="${c.shoulders}" opacity=".9" filter="url(#gf)" class="br" data-g="shoulders"/>
+  <ellipse cx="137" cy="72" rx="18" ry="13" fill="${c.shoulders}" opacity=".9" filter="url(#gf)" class="br" data-g="shoulders"/>
+  <path d="M79 59 Q100 53 121 59 L124 94 Q100 102 76 94 Z" fill="${c.chest}" opacity=".9" filter="url(#gf)" class="br" data-g="chest"/>
+  <path d="M80 94 Q100 102 120 94 L118 148 Q100 154 82 148 Z" fill="${c.core}" opacity=".9" filter="url(#gf)" class="br" data-g="core"/>
+  <path d="M76 94 L63 89 L59 150 L80 150 Z" fill="${c.back}" opacity=".55" filter="url(#gf)" class="br" data-g="back"/>
+  <path d="M124 94 L137 89 L141 150 L120 150 Z" fill="${c.back}" opacity=".55" filter="url(#gf)" class="br" data-g="back"/>
+  <path d="M59 86 L45 88 L37 148 L52 150 L60 116 Z" fill="${c.arms}" opacity=".9" filter="url(#gf)" class="br" data-g="arms"/>
+  <path d="M141 86 L155 88 L163 148 L148 150 L140 116 Z" fill="${c.arms}" opacity=".9" filter="url(#gf)" class="br" data-g="arms"/>
+  <path d="M37 148 L33 195 L49 197 L52 150 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <path d="M163 148 L167 195 L151 197 L148 150 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="41" cy="201" rx="9" ry="7" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="159" cy="201" rx="9" ry="7" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <path d="M80 148 Q100 156 120 148 L122 190 Q100 200 78 190 Z" fill="${c.legs}" opacity=".85" filter="url(#gf)" class="br" data-g="legs"/>
+  <path d="M80 188 L77 192 L73 268 L92 270 L94 190 Z" fill="${c.legs}" opacity=".9" filter="url(#gf)" class="br" data-g="legs"/>
+  <path d="M120 188 L123 192 L127 268 L108 270 L106 190 Z" fill="${c.legs}" opacity=".9" filter="url(#gf)" class="br" data-g="legs"/>
+  <ellipse cx="83" cy="274" rx="11" ry="8" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="117" cy="274" rx="11" ry="8" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <path d="M72 281 L75 348 L91 348 L92 281 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <path d="M128 281 L125 348 L109 348 L108 281 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="83" cy="322" rx="9" ry="20" fill="${c.calves}" opacity=".85" filter="url(#gf)" class="br" data-g="calves"/>
+  <ellipse cx="117" cy="322" rx="9" ry="20" fill="${c.calves}" opacity=".85" filter="url(#gf)" class="br" data-g="calves"/>
+  <ellipse cx="83" cy="352" rx="11" ry="5" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="117" cy="352" rx="11" ry="5" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  </svg>`;
+
+  const B=`<svg viewBox="0 0 200 410" width="168" height="320" xmlns="http://www.w3.org/2000/svg">
+  <defs><filter id="gb"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <ellipse cx="100" cy="25" rx="19" ry="23" fill="#1c1c28" stroke="#333348" stroke-width="1.5"/>
+  <rect x="92" y="46" width="16" height="12" rx="3" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="63" cy="72" rx="18" ry="13" fill="${c.shoulders}" opacity=".9" filter="url(#gb)" class="br" data-g="shoulders"/>
+  <ellipse cx="137" cy="72" rx="18" ry="13" fill="${c.shoulders}" opacity=".9" filter="url(#gb)" class="br" data-g="shoulders"/>
+  <path d="M79 59 Q100 53 121 59 L124 94 Q100 98 76 94 Z" fill="${c.back}" opacity=".9" filter="url(#gb)" class="br" data-g="back"/>
+  <path d="M76 94 L63 89 L59 150 L80 150 Z" fill="${c.back}" opacity=".9" filter="url(#gb)" class="br" data-g="back"/>
+  <path d="M124 94 L137 89 L141 150 L120 150 Z" fill="${c.back}" opacity=".9" filter="url(#gb)" class="br" data-g="back"/>
+  <path d="M80 94 Q100 100 120 94 L118 150 Q100 154 82 150 Z" fill="${c.back}" opacity=".82" filter="url(#gb)" class="br" data-g="back"/>
+  <path d="M59 86 L45 88 L37 148 L52 150 L60 116 Z" fill="${c.arms}" opacity=".9" filter="url(#gb)" class="br" data-g="arms"/>
+  <path d="M141 86 L155 88 L163 148 L148 150 L140 116 Z" fill="${c.arms}" opacity=".9" filter="url(#gb)" class="br" data-g="arms"/>
+  <path d="M37 148 L33 195 L49 197 L52 150 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <path d="M163 148 L167 195 L151 197 L148 150 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="41" cy="201" rx="9" ry="7" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="159" cy="201" rx="9" ry="7" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <path d="M80 148 Q100 156 120 148 L123 192 Q100 202 77 192 Z" fill="${c.legs}" opacity=".9" filter="url(#gb)" class="br" data-g="legs"/>
+  <path d="M80 190 L77 194 L73 270 L92 272 L94 192 Z" fill="${c.legs}" opacity=".9" filter="url(#gb)" class="br" data-g="legs"/>
+  <path d="M120 190 L123 194 L127 270 L108 272 L106 192 Z" fill="${c.legs}" opacity=".9" filter="url(#gb)" class="br" data-g="legs"/>
+  <ellipse cx="83" cy="276" rx="11" ry="8" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="117" cy="276" rx="11" ry="8" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <path d="M72 283 L75 350 L91 350 L92 283 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <path d="M128 283 L125 350 L109 350 L108 283 Z" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="83" cy="323" rx="9" ry="21" fill="${c.calves}" opacity=".9" filter="url(#gb)" class="br" data-g="calves"/>
+  <ellipse cx="117" cy="323" rx="9" ry="21" fill="${c.calves}" opacity=".9" filter="url(#gb)" class="br" data-g="calves"/>
+  <ellipse cx="83" cy="354" rx="11" ry="5" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  <ellipse cx="117" cy="354" rx="11" ry="5" fill="#1c1c28" stroke="#333348" stroke-width="1"/>
+  </svg>`;
+
+  document.getElementById('bsvg').innerHTML=bview==='front'?F:B;
+  document.querySelectorAll('.br').forEach(el=>{
+    el.style.cursor='pointer';el.style.transition='opacity .2s';
+    el.addEventListener('mouseenter',()=>el.style.opacity='1');
+    el.addEventListener('mouseleave',()=>{el.style.opacity=el.getAttribute('opacity')||'.9'});
+    el.addEventListener('click',()=>{
+      const g=MG.find(x=>x.id===el.dataset.g);
+      const s=gScore(g.id),r=getRank(s);
+      toast(`${g.name}: ${s>0?r.i+' '+r.n+' · '+s+' pts':'No data yet'}`);
+    });
+  });
+
+  document.getElementById('blegend').innerHTML=MG.map(g=>{
+    const s=gScore(g.id),r=getRank(s),col=s>0?r.c:'#2a2a38';
+    return`<div class="bleg-item">
+      <div class="bleg-dot" style="background:${col};box-shadow:0 0 6px ${col}"></div>
+      <div class="bleg-name">${g.name}</div>
+      <div class="bleg-rank" style="color:${col}">${s>0?r.i+' '+r.n:'Unranked'}</div>
+      <div class="bleg-score">${s>0?s:''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  LOG TAB
+// ══════════════════════════════════════════════════════════════════════
+let selEx=null;
+function buildExList(f=''){
+  const fl=f.toLowerCase();
+  document.getElementById('exList').innerHTML=MG.map(g=>{
+    const m=g.exs.filter(e=>!fl||e.name.toLowerCase().includes(fl));
+    if(!m.length) return'';
+    return`<div class="ex-glabel">${g.name}</div>`+m.map(e=>{
+      const pr=CU.prs[e.id];
+      return`<div class="ex-item${selEx===e.id?' sel':''}" onclick="selExercise('${e.id}')">
+        <div class="ex-dot" style="background:${g.color}"></div>
+        <span>${e.name}</span>
+        ${pr?`<span class="ex-pr">${pr}kg</span>`:''}
+      </div>`;
+    }).join('');
+  }).join('');
+}
+
+function filterEx(){buildExList(document.getElementById('exSearch').value)}
+
+function selExercise(id){
+  selEx=id; buildExList(document.getElementById('exSearch').value);
+  const ex=ALEX[id];
+  const val=CU.prs[id]||0;
+  const rat=val>0?rateEx(id,val,CU.bw,CU.sex):null;
+  document.getElementById('noExSel').style.display='none';
+  document.getElementById('logInner').style.display='block';
+  document.getElementById('selExName').textContent=ex.name;
+  const typeHint=ex.type==='added'?'Enter ADDED weight only (0 = bodyweight only)':ex.type==='db'?'Enter weight of ONE dumbbell':'Enter total bar weight';
+  document.getElementById('selExMeta').textContent=`${ex.gname} · ${typeHint}`;
+  document.getElementById('curPrVal').textContent=val>0?`${val} kg`:'No PR yet';
+  document.getElementById('curPrVal').style.color=rat?rat.color:'var(--muted)';
+  document.getElementById('curPrRat').textContent=rat?rat.label:'—';
+  document.getElementById('curPrRat').style.color=rat?rat.color:'var(--muted)';
+  document.getElementById('logW').value='';
+  document.getElementById('logR').value='1';
+  document.getElementById('ormPrev').textContent='';
+}
+
+['logW','logR'].forEach(id=>{
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.getElementById(id)?.addEventListener('input',updORM);
+  });
+});
+function updORM(){
+  const w=parseFloat(document.getElementById('logW').value);
+  const r=parseInt(document.getElementById('logR').value)||1;
+  document.getElementById('ormPrev').textContent=
+    w&&r>1?`→ Est. 1RM: ${epley(w,r)} kg (Epley)`:(w&&r===1?`→ 1RM: ${w} kg`:'');
+}
+
+async function logWO(){
+  if(!CU.bw){document.getElementById('noStatWarn').style.display='block';toast('Set profile first','orange');return}
+  if(!selEx){toast('Select an exercise','orange');return}
+  const raw=parseFloat(document.getElementById('logW').value);
+  const reps=parseInt(document.getElementById('logR').value)||1;
+  if(!raw||raw<=0){toast('Enter a valid weight','red');return}
+  const nw=epley(raw,reps);
+  const ow=CU.prs[selEx]||0;
+  const oldS=CU.score;
+  if(nw<=ow&&ow>0){toast(`Current PR is ${ow}kg — no improvement`,'orange');return}
+  const oldRI=getRankI(oldS);
+  CU.prs[selEx]=nw;
+  CU.score=overallScore();
+  const ex=ALEX[selEx];
+  const diff=ow>0?`+${(nw-ow).toFixed(1)}kg`:`${nw}kg`;
+  if(!CU.history)CU.history=[];
+  const entry={
+    date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}),
+    lift:ex.name,group:ex.gname,gid:ex.gid,from:ow,to:nw,diff,
+    xp:CU.score-oldS,rank:getRank(CU.score).n,
+    reps:reps>1?`${reps} reps @ ${raw}kg → ${nw}kg 1RM`:null
+  };
+  CU.history.unshift(entry);
+  try{
+    await saveUser();
+    await saveHistoryEntry(entry);
+  }catch(e){ toast('Save failed: '+e.message,'red'); return; }
+  updateCard(CU.score,oldS);
+  selExercise(selEx);
+  buildExList(document.getElementById('exSearch').value);
+  if(getRankI(CU.score)>oldRI)rankUp();
+  else toast(`PR! ${ex.name} → ${nw}kg (${diff})`);
+  document.getElementById('logW').value='';
+  document.getElementById('logR').value='1';
+  document.getElementById('ormPrev').textContent='';
+  renderLeaderboard();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  HISTORY
+// ══════════════════════════════════════════════════════════════════════
+let histF='all';
+function renderHistory(){
+  const data=histF==='all'?(CU.history||[]):(CU.history||[]).filter(h=>h.gid===histF);
+  const list=document.getElementById('histList');
+  const empty=document.getElementById('histEmpty');
+  document.getElementById('histFilters').innerHTML=
+    `<div class="hist-f${histF==='all'?' active':''}" onclick="setHF('all',this)">All</div>`+
+    MG.map(g=>`<div class="hist-f${histF===g.id?' active':''}" onclick="setHF('${g.id}',this)" style="${histF===g.id?'border-color:'+g.color+';color:'+g.color:''}">${g.name}</div>`).join('');
+  if(!data.length){empty.style.display='block';list.innerHTML='';return}
+  empty.style.display='none';
+  list.innerHTML=data.slice(0,60).map(h=>{
+    const g=MG.find(x=>x.name===h.group);const col=g?g.color:'#8a8a9a';
+    return`<div class="hist-item">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:7px;height:7px;border-radius:50%;background:${col};flex-shrink:0;box-shadow:0 0 5px ${col}"></div>
+        <div>
+          <div class="hist-date">${h.date} · ${h.rank} · ${h.group||''}</div>
+          <div class="hist-lift">${h.lift}</div>
+          ${h.reps?`<div class="hist-sub">${h.reps}</div>`:''}
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="hist-chg">${h.diff}</div>
+        <div class="hist-xp">${h.xp>=0?'+':''}${h.xp} pts</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function setHF(f){histF=f;renderHistory()}
+
+let lbF='overall';
+const EMOJIS=['🦁','🐯','🦊','🐻','🐺','🦅','🐲','⚡','💀','🔥'];
+function getAvatar(u){return EMOJIS[Math.abs(u.split('').reduce((a,c)=>a+c.charCodeAt(0),0))%EMOJIS.length]}
+
+async function renderLeaderboard(){
+  document.getElementById('lbTable').innerHTML=`<div class="lb-empty" style="color:var(--muted)">Loading…</div>`;
+  try{
+    // Fetch all profiles
+    const profiles = await sb.select('profiles','?select=username,display_name,bw,sex,score,prs,is_owner&order=score.desc');
+
+    let rows = profiles.map(u=>{
+      let sc;
+      if(lbF==='overall'){
+        sc = u.score||0;
+      } else {
+        if(!u.bw||!u.prs) return{...u,lbScore:0};
+        const g=MG.find(x=>x.id===lbF); if(!g) return{...u,lbScore:0};
+        let tw=0,ts=0;
+        g.exs.forEach(e=>{
+          const v=u.prs[e.id]; if(v==null||v==='') return;
+          const r=rateExForUser(e.id,v,u.bw,u.sex||'male');
+          ts+=r.score*e.w; tw+=e.w;
+        });
+        sc=tw>0?Math.round(ts/tw):0;
+      }
+      return{...u,lbScore:sc};
+    })
+    .filter(u=>u.lbScore>0)
+    .sort((a,b)=>b.lbScore-a.lbScore);
+
+    if(!rows.length){
+      document.getElementById('lbTable').innerHTML=`<div class="lb-empty">No ranked athletes yet.<br>Set your profile to appear here!</div>`;
+      return;
+    }
+
+    const posClass=i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    document.getElementById('lbTable').innerHTML=rows.map((u,i)=>{
+      const isMe=u.username===CU.username;
+      const isOwner=u.is_owner===true;
+      const rk=getRank(u.lbScore);
+      const av=isOwner?'👑':getAvatar(u.username);
+      const bwStr=u.bw?`${u.bw}kg`:'';
+      const prs=u.prs||{};
+      const keyLifts=[];
+      if(prs.bench)  keyLifts.push(`B:${prs.bench}`);
+      if(prs.squat)  keyLifts.push(`S:${prs.squat}`);
+      if(prs.deadlift) keyLifts.push(`D:${prs.deadlift}`);
+      return`<div class="lb-row${isMe?' me':''}${isOwner?' owner':''}">
+        <div class="lb-pos ${posClass(i)}">${isOwner?'👑':i<3?['🥇','🥈','🥉'][i]:i+1}</div>
+        <div class="lb-avatar" style="background:${isOwner?'#ff4d1c22':''+rk.c+'22'};border-color:${isOwner?'#ff4d1c':''+rk.c+'44'}">${av}</div>
+        <div class="lb-info">
+          <div class="lb-user">${u.display_name||u.username}
+            ${isOwner?`<span class="lb-you" style="background:#ff4d1c;letter-spacing:2px">👑 OWNER</span>`:''}
+            ${isMe&&!isOwner?`<span class="lb-you">YOU</span>`:''}
+            ${isMe&&isOwner?`<span class="lb-you" style="background:#ffaa00;color:#000">YOU</span>`:''}
+          </div>
+          <div class="lb-stats">${[bwStr,...keyLifts].filter(Boolean).join(' · ')}</div>
+        </div>
+        <div><div class="lb-rank-badge" style="color:${isOwner?'#ff4d1c':rk.c};border-color:${isOwner?'#ff4d1c':rk.c}">${isOwner?'👑 OWNER':rk.i+' '+rk.n}</div></div>
+        <div class="lb-score" style="color:${isOwner?'#ff4d1c':rk.c}">${u.lbScore}</div>
+      </div>`;
+    }).join('');
+  } catch(e){
+    document.getElementById('lbTable').innerHTML=`<div class="lb-empty">Failed to load: ${e.message}</div>`;
+  }
+}
+
+function setLBF(f,btn){
+  lbF=f;
+  document.querySelectorAll('.lb-f').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeaderboard();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  RANK LADDER
+// ══════════════════════════════════════════════════════════════════════
+function renderRankLadder(){
+  const cur=getRank(CU.score);
+  document.getElementById('rankLadder').innerHTML=RANKS.map(r=>{
+    const isc=r.n===cur.n,ach=CU.score>=r.min;
+    return`<div class="rung${isc?' cur':''}" style="--rc:${r.c}">
+      <div class="rung-dot" style="background:${ach?r.c:'#2a2a38'};box-shadow:${ach?'0 0 7px '+r.c:'none'};opacity:${ach?1:.3}"></div>
+      <div class="rung-name" style="color:${ach?r.c:'var(--muted)'}">${r.i} ${r.n}</div>
+      <div class="rung-score">${r.min}+</div>
+      ${isc?`<span class="rung-you" style="background:${r.c}">YOU</span>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  TABS / UTILS
+// ══════════════════════════════════════════════════════════════════════
+function ST(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='body')renderBody();
+  if(name==='history')renderHistory();
+  if(name==='leaderboard')renderLeaderboard();
+  if(name==='ranks')renderRankLadder();
+  if(name==='log'){
+    document.getElementById('noStatWarn').style.display=CU.bw?'none':'block';
+    buildExList();
+  }
+}
+
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.borderColor=type==='red'?'#ff4444':type==='orange'?'#ffaa00':'var(--accent3)';
+  t.style.color=type==='red'?'#ff4444':type==='orange'?'#ffaa00':'var(--accent3)';
+  t.classList.add('show');clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+function rankUp(){
+  const f=document.getElementById('rankFlash');
+  f.style.background=getRank(CU.score).c;
+  f.classList.remove('flash');void f.offsetWidth;f.classList.add('flash');
+  toast('🎉 RANK UP! '+getRank(CU.score).n.toUpperCase());
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════════════════════
+function bootApp(){
+  document.getElementById('userPill').innerHTML=`Logged in as <strong>${CU.display_name||CU.username}</strong>`;
+  buildProfLifts();
+  buildExList();
+  if(CU.bw) document.getElementById('bw').value=CU.bw;
+  if(CU.ht) document.getElementById('ht').value=CU.ht;
+  if(CU.sex) document.getElementById('sx').value=CU.sex;
+  Object.entries(CU.prs||{}).forEach(([id,v])=>{const el=document.getElementById('pr_'+id);if(el)el.value=v});
+  if(CU.score>0){updateCard(CU.score,0);if(CU.bw)renderLiftSecs()}
+  renderRankLadder();
+  document.getElementById('logW')?.addEventListener('input',updORM);
+  document.getElementById('logR')?.addEventListener('input',updORM);
+}
+
+// Session restore on load
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const session = await sb.getSession();
+  if(session){
+    try{
+      const profiles = await sb.select('profiles',`?id=eq.${sb._uid}&select=*`);
+      if(profiles.length){
+        const p = profiles[0];
+        const hist = await sb.select('workout_history',`?user_id=eq.${sb._uid}&order=logged_at.desc&limit=100`);
+        CU = {...p, history: hist.map(h=>({
+          date: new Date(h.logged_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}),
+          lift:h.lift_name, group:h.group_name, gid:h.group_id,
+          from:h.from_kg, to:h.to_kg, diff:h.diff, xp:h.xp,
+          rank:h.rank_name, reps:h.reps_note
+        }))};
+        showApp();
+        return;
+      }
+    }catch(e){ console.warn('Session restore failed',e); }
+  }
+  // No valid session — show auth
+  document.getElementById('authScreen').style.display='flex';
+});
+</script>
+</body>
+</html>
